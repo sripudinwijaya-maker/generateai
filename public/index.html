@@ -156,14 +156,15 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   button.go, button.go:hover:not(:disabled) { transition: none; transform: none; }
 }
 
+.login-wrap { width:min(440px, calc(100% - 28px)); margin:9vh auto 30px; }
+.login-panel { border:1px solid var(--line); border-radius:var(--radius); padding:clamp(22px,5vw,34px); background:var(--panel); box-shadow:0 20px 70px rgba(0,0,0,.28); backdrop-filter:var(--blur); }
+.login-panel h1 { font:700 clamp(24px,6vw,34px) var(--f-display); margin:0 0 8px; }
+.login-panel p { color:var(--muted); margin:0 0 22px; line-height:1.55; }
+.login-panel .field { margin:14px 0; }
+.login-panel input { width:100%; }
+.login-error { color:var(--rec); font-size:14px; min-height:20px; margin:10px 0; }
+.login-button { width:100%; border:0; border-radius:10px; padding:13px 16px; background:var(--accent); color:var(--accent-fg); font-weight:700; cursor:pointer; }
 .logout { border:1px solid var(--line); border-radius:999px; padding:8px 12px; color:var(--fg); background:var(--panel); cursor:pointer; }
-
-.suno-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:9px}
-.suno-menu-item{appearance:none;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:12px;border:1px solid var(--border,#303544);border-radius:12px;background:var(--panel2,#151925);color:inherit;cursor:pointer;min-height:90px}
-.suno-menu-item>span{font-size:21px}.suno-menu-item b{font-size:13px;line-height:1.25}.suno-menu-item small{font-size:11px;opacity:.72;line-height:1.35}
-.suno-menu-item.active{border-color:var(--accent,#8b5cf6);box-shadow:0 0 0 1px var(--accent,#8b5cf6) inset;background:rgba(139,92,246,.12)}
-.suno-menu-item:focus-visible{outline:2px solid var(--accent,#8b5cf6);outline-offset:2px}
-@media(min-width:720px){.suno-menu{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -187,38 +188,26 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
   <div class="grid">
     <form class="panel" id="form">
-      <div class="field">
-        <label for="apiKey">API key</label>
-        <input type="password" id="apiKey" autocomplete="off" spellcheck="false" placeholder="Tempel API key kamu" required>
-        <div class="hint">Key hanya dikirim ke server saat tombol ditekan dan tidak disimpan.</div>
-      </div>
       <h2>Pengaturan lagu</h2>
 
-      <div class="hint" style="margin-bottom:16px">Masukkan API key kamu di kolom di atas. Key dikirim per permintaan dan tidak disimpan di server.</div>
+      <div class="field" style="margin-bottom:16px"><label for="apiKey">API key Emix</label><input id="apiKey" type="password" autocomplete="off" placeholder="Tempel API key Emix di sini" required><div class="hint">Key hanya dipakai untuk permintaan generate dan cek status pada sesi halaman ini. Jangan bagikan key ke orang lain.</div></div>
 
       <div class="field">
-        <label>Menu Suno</label>
-        <div class="suno-menu" id="sunoMenu" role="group" aria-label="Pilih fitur Suno">
-          <button type="button" class="suno-menu-item active" data-workflow="generate"><span>🎵</span><b>Generate Music</b><small>Buat lagu baru</small></button>
-          <button type="button" class="suno-menu-item" data-workflow="cover"><span>🎧</span><b>Upload Cover Audio</b><small>Buat versi cover</small></button>
-          <button type="button" class="suno-menu-item" data-workflow="extend"><span>⏩</span><b>Upload & Extend</b><small>Upload lalu lanjutkan lagu</small></button>
-          <button type="button" class="suno-menu-item" data-workflow="addVocals"><span>🎤</span><b>Add Vocals</b><small>Tambahkan vokal</small></button>
-          <button type="button" class="suno-menu-item" data-workflow="musicCover"><span>🖼️</span><b>Generate Music Cover</b><small>Buat artwork cover</small></button>
-        </div>
-        <select id="workflow" hidden aria-hidden="true"><option value="generate">Generate Music</option><option value="cover">Upload Cover Audio</option><option value="extend">Upload and Extend Audio</option><option value="musicCover">Generate Music Cover</option><option value="addVocals">Add Vocals</option></select>
-        <div class="hint">Ketuk menu untuk membuka pengaturan fitur tersebut.</div>
+        <label for="workflow">Studio</label>
+        <select id="workflow"><option value="kling">🎬 Kling Motion</option><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
+        <div class="hint">Pilih salah satu dari empat fitur.</div>
       </div>
 
       <div id="sunoFields">
       <div class="field">
         <label for="model">Model</label>
-        <select id="model"><option value="V6">V6</option><option value="V6_WILD">V6 Wild</option><option value="V6_MINI">V6 Mini</option></select>
+        <select id="model"><option>V6</option><option>V6_WILD</option><option>V6_MINI</option></select>
       </div>
 
       <div class="field" id="sourceAudioField">
-        <label for="uploadUrl">Link audio <span class="hint">(wajib untuk Cover Audio, Extend, dan Add Vocals)</span></label>
-        <input type="url" id="uploadUrl" placeholder="https://contoh.com/lagu.mp3">
-        <div class="hint">Pakai URL publik. Upload file langsung belum didukung. Maksimal 8 menit.</div>
+        <label for="uploadUrl">Link audio <span class="hint">(wajib untuk Cover Audio/Extend)</span></label>
+        <input type="url" id="uploadUrl" placeholder="https://contoh.com/lagu.mp3" required>
+        <div class="hint">URL publik berformat mp3, wav, aac, m4a, atau ogg. Maksimal 8 menit dan 50 MB.</div>
       </div>
 
       <div class="field">
@@ -240,31 +229,6 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <input type="number" id="continueAt" min="0" max="600" step="1" value="90">
         <div class="hint">Posisi pada audio sumber tempat lagu mulai diperpanjang.</div>
       </div>
-      <details id="advancedSunoFields">
-        <summary>Parameter lanjutan Suno</summary>
-        <div class="field" id="audioIdField">
-          <label for="audioId">Audio ID (untuk track Suno)</label>
-          <input type="text" id="audioId" placeholder="ID track dari hasil Suno">
-        </div>
-        <div class="field" id="audioIdsField">
-          <label for="audioIds">Audio IDs (pisahkan koma, jika fitur butuh beberapa track)</label>
-          <input type="text" id="audioIds" placeholder="audio_id_1, audio_id_2">
-        </div>
-        <div class="field" id="personaIdField">
-          <label for="personaId">Persona ID</label>
-          <input type="text" id="personaId" placeholder="ID persona (jika digunakan)">
-        </div>
-        <div class="field" id="voiceIdField">
-          <label for="voiceId">Voice ID</label>
-          <input type="text" id="voiceId" placeholder="ID voice (jika digunakan)">
-        </div>
-        <div class="row">
-          <div class="field"><label for="startTime">Start time</label><input type="text" id="startTime" placeholder="00:30 atau detik"></div>
-          <div class="field"><label for="endTime">End time</label><input type="text" id="endTime" placeholder="01:00 atau detik"></div>
-        </div>
-        <div class="field"><label for="stylePrompt">Style prompt tambahan</label><input type="text" id="stylePrompt" placeholder="Instruksi gaya tambahan"></div>
-        <div class="hint">Isi hanya ID/parameter yang diminta fitur terkait. Nilai kosong tidak dikirim ke API.</div>
-      </details>
 
       <label class="check block"><input type="checkbox" id="instrumental"> Instrumental (tanpa vokal)</label>
 
@@ -295,7 +259,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <div class="field">
           <label for="klingVideoUrl">URL video gerakan</label>
           <input type="url" id="klingVideoUrl" placeholder="https://.../gerakan.mp4">
-          <div class="hint">MP4 atau MOV, maksimal 100 MB. File harus punya URL publik yang bisa diakses layanan AI.</div>
+          <div class="hint">MP4 atau MOV, maksimal 100 MB. File harus punya URL publik yang bisa diakses Emix.</div>
         </div>
         <div class="field">
           <label for="klingPrompt">Prompt (opsional)</label>
@@ -312,7 +276,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
             <select id="klingMode"><option value="720p">720p</option><option value="1080p">1080p</option></select>
           </div>
         </div>
-        <div class="hint" style="margin-bottom:16px">Semua upload memakai URL publik, sesuai dokumentasi. Untuk Generate Music Cover, isi ID task lagu Suno di kolom ID track.</div>
+        <div class="hint" style="margin-bottom:16px">Catatan: API upload file otomatis belum tersedia di dokumentasi yang dikirim, jadi sementara gunakan URL publik untuk gambar dan video.</div>
       </div>
 
       <button class="go" id="go" type="submit">Generate</button>
@@ -332,40 +296,26 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var timer = null, startedAt = 0;
-  var keyNote = "";
+  var keyIndex = null, keyNote = "";
   function headers(json) {
     var h = { "x-api-key": $("apiKey").value.trim() };
     if (json) h["Content-Type"] = "application/json";
     return h;
   }
-
   // ---------- Form ----------
   function refreshWorkflow() {
     var w = $("workflow").value;
-    var kling = false, generate = w === "generate", extend = w === "extend" || w === "extendExisting";
+    var kling = w === "kling", generate = w === "generate", extend = w === "extend";
     $("sunoFields").hidden = kling; $("klingFields").hidden = !kling;
-    $("sourceAudioField").hidden = generate || w === "extendExisting" || w === "musicCover";
-    $("uploadUrl").required = !kling && ["cover", "extend", "addVocals"].includes(w);
-    $("continueAtField").hidden = w !== "extend" && w !== "extendExisting";
-    $("audioIdField").hidden = !["extendExisting", "addInstrumental", "replaceSection", "boostStyle", "musicCover", "persona", "timestampedLyrics", "separateVocals", "midi"].includes(w);
-    $("audioIdsField").hidden = w !== "mashup";
-    $("personaIdField").hidden = !["generate", "extend", "extendExisting"].includes(w);
-    $("voiceIdField").hidden = true;
-    $("startTime").required = w === "replaceSection"; $("endTime").required = w === "replaceSection";
+    $("sourceAudioField").hidden = generate;
+    $("uploadUrl").required = !kling && !generate;
+    $("continueAtField").hidden = !extend;
     $("klingImageUrl").required = kling; $("klingVideoUrl").required = kling;
-    $("go").textContent = kling ? "Jalankan AI" : ({generate:"Generate Music",cover:"Upload Cover Audio",extend:"Upload and Extend Audio",extendExisting:"Extend Existing Track",addVocals:"Add Vocals",addInstrumental:"Add Instrumental",replaceSection:"Replace Section",boostStyle:"Boost Music Style",musicCover:"Generate Music Cover",persona:"Generate Persona",mashup:"Mashup Music",timestampedLyrics:"Timestamped Lyrics",separateVocals:"Separate Vocals / Stems",midi:"Generate MIDI"}[w] || "Jalankan Suno");
+    $("go").textContent = kling ? "Generate Motion Control" : generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
     $("model").disabled = kling;
     $("durationField").hidden = extend;
   }
   $("workflow").addEventListener("change", refreshWorkflow);
-  document.querySelectorAll("[data-workflow]").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      $("workflow").value = btn.dataset.workflow;
-      document.querySelectorAll("[data-workflow]").forEach(function(item){ item.classList.toggle("active", item === btn); item.setAttribute("aria-pressed", item === btn ? "true" : "false"); });
-      document.querySelectorAll("[data-workflow]").forEach(function(item){ item.setAttribute("aria-pressed", item.dataset.workflow === $("workflow").value ? "true" : "false"); });
-  refreshWorkflow();
-    });
-  });
   $("klingPrompt").addEventListener("input", function () { $("klingPromptCount").textContent = $("klingPrompt").value.length; });
   refreshWorkflow();
   $("duration").addEventListener("input", function () {
@@ -388,12 +338,12 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
   var ERR = {
     400: "Parameter tidak valid. Periksa isian form.",
-    401: "API key kosong, salah, atau ditolak. Periksa API key yang dimasukkan.",
+    401: "API key ditolak atau belum diisi. Periksa API key Emix lo.",
     402: "Saldo API key tidak cukup.",
     404: "Sumber tidak ditemukan.",
     422: "Validasi gagal. Periksa link audio dan isian lainnya.",
     429: "Terlalu banyak request. Tunggu beberapa detik lalu coba lagi.",
-    408: "Layanan AI sedang bermasalah dan tidak mengembalikan hasil lebih dari 10 menit.",
+    408: "Layanan di belakang Emix sedang bermasalah dan tidak mengembalikan hasil lebih dari 10 menit.",
     455: "Layanan sedang dalam perawatan.",
     500: "Server bermasalah. Coba lagi nanti.",
     501: "Pembuatan lagu gagal.",
@@ -469,7 +419,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     }
     var sec = data.costTime ? " dalam " + Math.round(data.costTime / 1000) + " detik" : "";
     setState("ok", "Selesai",
-      urls.length ? (kling ? "Video Motion Control selesai" : "Tugas Suno selesai") + sec + ". " + keyNote + (data.creditsConsumed ? " Kredit terpakai: " + data.creditsConsumed + "." : "") + " Segera unduh hasilnya."
+      urls.length ? (kling ? "Video Motion Control selesai" : "Cover selesai") + sec + ". " + keyNote + (data.creditsConsumed ? " Kredit terpakai: " + data.creditsConsumed + "." : "") + " Segera unduh hasilnya."
                   : "Tugas selesai, tetapi tidak ada URL hasil yang dikenali. Lihat respons mentah di bawah.");
     $("raw").textContent = JSON.stringify(data, null, 2);
     $("rawBox").hidden = urls.length > 0;
@@ -482,7 +432,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       if (busy) return; busy = true;
       var sec = Math.round((Date.now() - startedAt) / 1000);
       try {
-        var url = "/api/status?taskId=" + encodeURIComponent(taskId) + "&workflow=" + encodeURIComponent($("workflow").value) + "";
+        var url = "/api/status?taskId=" + encodeURIComponent(taskId) + "&workflow=" + encodeURIComponent($("workflow").value);
         var r = await fetch(url, { headers: headers(false) });
         var j = await r.json();
         if (j.code !== 200) return fail(j.code, j.msg);
@@ -500,7 +450,6 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     ev.preventDefault();
     clearInterval(timer);
     $("tracks").innerHTML = ""; $("rawBox").hidden = true;
-    if (!$("apiKey").value.trim()) return setState("err", "Gagal", "Masukkan API key dulu.", true);
     var workflow = $("workflow").value;
     var isKling = workflow === "kling";
     if (isKling) {
@@ -517,57 +466,31 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       mode: $("klingMode").value
     } : {
       model: $("model").value,
-      customMode: true,
       uploadUrl: $("uploadUrl").value.trim(),
       title: $("title").value.trim(),
       style: $("style").value.trim(),
+      prompt: $("style").value.trim(),
       duration: Number($("duration").value),
       continueAt: Number($("continueAt").value),
-      audioId: $("audioId").value.trim(),
-      audioIds: $("audioIds").value.split(",").map(function(v){return v.trim();}).filter(Boolean),
-      personaId: $("personaId").value.trim(),
-      voiceId: $("voiceId").value.trim(),
-      startTime: $("startTime").value.trim(),
-      endTime: $("endTime").value.trim(),
-      stylePrompt: $("stylePrompt").value.trim(),
       instrumental: $("instrumental").checked,
       negativeTags: $("negativeTags").value.trim(),
-      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: 1
+      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: "normal"
     };
     if (!isKling && !input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
-    if (!isKling && workflow === "generate") {
-      // Generate Music: lirik isi -> Custom Mode, kosong -> mode sederhana dari gaya musik.
-      var lyr = $("Lyrics").value.trim(), style = $("style").value.trim(), inst = $("instrumental").checked;
-      delete input.uploadUrl;
-      if (inst && !style) return setState("err", "Gagal", "Musik instrumental membutuhkan gaya musik.", true);
-      if (!inst && !lyr) {
-        input.customMode = false;
-        input.prompt = style;
-        delete input.style; delete input.title; delete input.Lyrics;
-        if (!style) return setState("err", "Gagal", "Isi gaya musik atau lirik dulu.", true);
-      } else {
-        input.customMode = true;
-        input.lyrics = inst ? "" : lyr;
-        delete input.prompt; delete input.Lyrics;
-        input.style = style;
-        input.title = $("title").value.trim() || "Untitled";
-      }
-    }
+    if (!isKling && workflow === "generate") delete input.uploadUrl;
     $("go").disabled = true;
     setState("wait", "Mengirim", "Membuat tugas…");
     try {
       var r = await fetch("/api/create", { method: "POST", headers: headers(true), body: JSON.stringify({ workflow: workflow, input: input }) });
       var j = await r.json();
       if (j.code !== 200) {
-        var detail = j.msg || j.providerMessage || "Permintaan gagal.";
-        if (j.providerMessage && j.providerMessage !== detail) detail += " Detail: " + j.providerMessage;
-        if (j.source === "provider" && j.upstreamStatus) {
-          detail += " [Respons server AI HTTP " + j.upstreamStatus + "].";
+        var detail = j.msg || "";
+        if (j.source === "emix" && j.upstreamStatus) {
+          detail += " [Respons Emix HTTP " + j.upstreamStatus + "].";
         }
-        if (j.code === 422) detail += " Periksa isian khusus untuk menu yang dipilih.";
         return fail(j.code, detail);
       }
-      keyNote = "Memakai API key yang kamu masukkan.";
+      keyIndex = Number.isInteger(j.userKeyIndex) ? j.userKeyIndex : 0; keyNote = "Memakai API key yang dimasukkan.";
       poll(j.data.taskId);
     } catch (e) { fail(0, e.message); }
   });
