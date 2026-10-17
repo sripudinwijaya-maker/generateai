@@ -386,6 +386,51 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     finally { btn.disabled = false; btn.textContent = old; }
   }
 
+  function saveBlob(blob, name) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 15000);
+  }
+  function pcmWav(buffer) {
+    var channels = buffer.numberOfChannels, sampleRate = buffer.sampleRate, frames = buffer.length;
+    var bytes = 44 + frames * channels * 2, out = new ArrayBuffer(bytes), view = new DataView(out);
+    function str(off, val) { for (var j=0;j<val.length;j++) view.setUint8(off+j,val.charCodeAt(j)); }
+    str(0,"RIFF"); view.setUint32(4,36+frames*channels*2,true); str(8,"WAVE"); str(12,"fmt ");
+    view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,channels,true);
+    view.setUint32(24,sampleRate,true); view.setUint32(28,sampleRate*channels*2,true); view.setUint16(32,channels*2,true);
+    view.setUint16(34,16,true); str(36,"data"); view.setUint32(40,frames*channels*2,true);
+    var data = []; for (var c=0;c<channels;c++) data.push(buffer.getChannelData(c));
+    var off=44; for (var i=0;i<frames;i++) for (var c=0;c<channels;c++) { var x=Math.max(-1,Math.min(1,data[c][i])); view.setInt16(off,x<0?x*32768:x*32767,true); off+=2; }
+    return new Blob([out],{type:"audio/wav"});
+  }
+  async function ensureLame() {
+    if (window.lamejs) return window.lamejs;
+    if (window.__lameLoading) return window.__lameLoading;
+    window.__lameLoading = new Promise(function(resolve,reject){
+      var sc=document.createElement("script"); sc.src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js";
+      sc.onload=function(){ window.lamejs ? resolve(window.lamejs) : reject(new Error("Library MP3 tidak tersedia")); };
+      sc.onerror=function(){reject(new Error("Gagal memuat encoder MP3. Coba WAV atau periksa koneksi."));}; document.head.appendChild(sc);
+    }); return window.__lameLoading;
+  }
+  async function convertAudio(url, format, name, btn) {
+    var old=btn.textContent; btn.disabled=true; btn.textContent="Menyiapkan audio…";
+    try {
+      var r=await fetch(url); if(!r.ok) throw new Error("Tidak bisa membaca audio sumber (HTTP "+r.status+"). Server file mungkin memblokir konversi karena CORS.");
+      var ab=await r.arrayBuffer(); var ctx=new (window.AudioContext||window.webkitAudioContext)();
+      var audio; try { audio=await ctx.decodeAudioData(ab.slice(0)); } finally { if(ctx.close) ctx.close(); }
+      var blob;
+      if(format==="wav") { blob=pcmWav(audio); }
+      else if(format==="mp3") {
+        var lame=await ensureLame(), channels=Math.min(2,audio.numberOfChannels), enc=new lame.Mp3Encoder(channels,audio.sampleRate,192), chunks=[];
+        var left=audio.getChannelData(0), right=channels>1?audio.getChannelData(1):left, size=1152;
+        function pcm16(arr,start,end){var out=new Int16Array(end-start);for(var k=start;k<end;k++){var x=Math.max(-1,Math.min(1,arr[k]));out[k-start]=x<0?x*32768:x*32767;}return out;}
+        for(var i=0;i<left.length;i+=size){var l=pcm16(left,i,Math.min(i+size,left.length)), rr=pcm16(right,i,Math.min(i+size,right.length));var chunk=channels>1?enc.encodeBuffer(l,rr):enc.encodeBuffer(l);if(chunk.length)chunks.push(chunk);btn.textContent="Konversi MP3… "+Math.min(99,Math.round(i/left.length*100))+"%";}
+        var tail=enc.flush();if(tail.length)chunks.push(tail);blob=new Blob(chunks,{type:"audio/mpeg"});
+      } else throw new Error("Format konversi belum didukung.");
+      saveBlob(blob,name+"."+format);
+    } catch(e) { alert("Konversi gagal: "+(e&&e.message||e)+"\n\nKalau sumber audio memblokir CORS, unduh file asli lalu konversi di perangkat."); }
+    finally { btn.disabled=false;btn.textContent=old; }
+  }
+
   function showResult(data) {
     clearInterval(timer);
     $("go").disabled = false;
@@ -402,11 +447,14 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       if (covers[i]) { var im = document.createElement("img"); im.src = covers[i]; im.alt = ""; im.className = "cover"; d.appendChild(im); }
       var a = document.createElement("audio"); a.controls = true; a.preload = "auto"; a.src = u;
       var bar = document.createElement("div"); bar.className = "acts";
-      var dl = document.createElement("button"); dl.type = "button"; dl.textContent = "Unduh";
-      var ext = (u.match(/\.(mp3|wav|m4a|aac|ogg)(\?|$)/i) || [0, "mp3"])[1].toLowerCase();
-      dl.addEventListener("click", function () { download(u, base + (urls.length > 1 ? "-" + (i + 1) : "") + "." + ext, dl); });
+      var ext = (u.match(/\.(mp3|wav|m4a|aac|ogg|flac)(\?|$)/i) || [0, "mp3"])[1].toLowerCase();
+      var name = base + (urls.length > 1 ? "-" + (i + 1) : "");
+      var format = document.createElement("select"); format.setAttribute("aria-label", "Format unduhan audio");
+      [["original","Asli ("+ext.toUpperCase()+")"],["mp3","Konversi MP3"],["wav","Konversi WAV"]].forEach(function(opt){var o=document.createElement("option");o.value=opt[0];o.textContent=opt[1];format.appendChild(o);});
+      var dl = document.createElement("button"); dl.type = "button"; dl.textContent = "Unduh audio";
+      dl.addEventListener("click", function () { if(format.value==="original") download(u,name+"."+ext,dl); else convertAudio(u,format.value,name,dl); });
       var l = document.createElement("a"); l.href = u; l.target = "_blank"; l.rel = "noopener"; l.textContent = "Buka di tab baru";
-      bar.appendChild(dl); bar.appendChild(l);
+      bar.appendChild(format); bar.appendChild(dl); bar.appendChild(l);
       d.appendChild(a); d.appendChild(bar); box.appendChild(d);
     });
     var kling = $("workflow").value === "kling";
