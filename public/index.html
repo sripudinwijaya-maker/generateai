@@ -190,11 +190,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     <form class="panel" id="form">
       <h2>Pengaturan lagu</h2>
 
-      <div class="field" id="sunoApiKeyField" style="margin-bottom:16px"><label for="apiKey">API key Emix (Suno)</label><input id="apiKey" type="password" autocomplete="off" placeholder="Tempel API key Emix untuk Suno" required><div class="hint">Khusus fitur Suno. Key dipakai untuk permintaan generate dan cek status pada sesi halaman ini.</div></div>
-      <div id="klingAccessFields" hidden>
-        <div class="field" style="margin-bottom:12px"><label for="klingApiKey">API key Emix (Kling)</label><input id="klingApiKey" type="password" autocomplete="off" placeholder="Tempel API key Emix untuk Kling"><div class="hint">Kling memakai kolom API key terpisah dari Suno.</div></div>
-        <div class="field" style="margin-bottom:16px"><label for="klingRedeemCode">Kode redeem Kling</label><input id="klingRedeemCode" type="password" autocomplete="off" placeholder="Masukkan kode redeem"><div class="hint">Fitur Kling hanya bisa digunakan dengan API key dan kode redeem yang benar.</div></div>
-      </div>
+      <div class="field" style="margin-bottom:16px"><label for="apiKey">API key Emix</label><input id="apiKey" type="password" autocomplete="off" placeholder="Tempel API key Emix di sini" required><div class="hint">Key hanya dipakai untuk permintaan generate dan cek status pada sesi halaman ini. Jangan bagikan key ke orang lain.</div></div>
 
       <div class="field">
         <label for="workflow">Studio</label>
@@ -216,7 +212,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
       <div class="field">
         <label for="title">Judul</label>
-        <input type="text" id="title" maxlength="80" placeholder="Judul lagu baru">
+        <input type="text" id="title" maxlength="100" placeholder="Judul lagu baru">
       </div>
 
       <div class="field">
@@ -302,8 +298,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   var timer = null, startedAt = 0;
   var keyIndex = null, keyNote = "";
   function headers(json) {
-    var isKling = $("workflow").value === "kling";
-    var h = { "x-api-key": (isKling ? $("klingApiKey").value : $("apiKey").value).trim() };
+    var h = { "x-api-key": $("apiKey").value.trim() };
     if (json) h["Content-Type"] = "application/json";
     return h;
   }
@@ -312,8 +307,6 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     var w = $("workflow").value;
     var kling = w === "kling", generate = w === "generate", extend = w === "extend";
     $("sunoFields").hidden = kling; $("klingFields").hidden = !kling;
-    $("sunoApiKeyField").hidden = kling; $("klingAccessFields").hidden = !kling;
-    $("apiKey").required = !kling; $("klingApiKey").required = kling; $("klingRedeemCode").required = kling;
     $("sourceAudioField").hidden = generate;
     $("uploadUrl").required = !kling && !generate;
     $("continueAtField").hidden = !extend;
@@ -481,16 +474,14 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       continueAt: Number($("continueAt").value),
       instrumental: $("instrumental").checked,
       negativeTags: $("negativeTags").value.trim(),
-      customMode: true, styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: "1"
+      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: "normal"
     };
     if (!isKling && !input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
     if (!isKling && workflow === "generate") delete input.uploadUrl;
     $("go").disabled = true;
     setState("wait", "Mengirim", "Membuat tugas…");
     try {
-      var requestBody = { workflow: workflow, input: input };
-      if (isKling) requestBody.redeemCode = $("klingRedeemCode").value.trim();
-      var r = await fetch("/api/create", { method: "POST", headers: headers(true), body: JSON.stringify(requestBody) });
+      var r = await fetch("/api/create", { method: "POST", headers: headers(true), body: JSON.stringify({ workflow: workflow, input: input }) });
       var j = await r.json();
       if (j.code !== 200) {
         var detail = j.msg || "";
