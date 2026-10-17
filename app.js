@@ -1,6 +1,6 @@
 (() => {
 const $=id=>document.getElementById(id);
-const API_BASE='https://api.emix.ai/api/v1/client/tasks';
+const API_BASE='/api';
 let apiKey='', request=null, pollTimer=null;
 const toast=(s)=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),3200)};
 document.querySelectorAll('.tab[data-page]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -19,7 +19,8 @@ $('apiKey').addEventListener('input',()=>{apiKey='';$('apiDot').classList.remove
 function getKey(){const field=$('apiKey').value.trim();if(field)apiKey=field;if(!apiKey){toast('Masukkan API key lalu tekan Sambungkan');$('apiKey').focus();return null}return apiKey}
 async function apiFetch(path,options={}){
  const key=getKey();if(!key)throw new Error('API key belum dimasukkan');
- const response=await fetch(API_BASE+path,{...options,headers:{Authorization:'Bearer '+key,'Content-Type':'application/json',...(options.headers||{})}});
+ const endpoint = path.startsWith('?') ? API_BASE+'/status'+path : API_BASE+path;
+ const response=await fetch(endpoint,{...options,headers:{'X-API-Key':key,'Content-Type':'application/json',...(options.headers||{})}});
  const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{data={raw}};
  if(!response.ok)throw new Error((data.msg||data.message||data.error||`HTTP ${response.status}`)+` (HTTP ${response.status})`);
  if(data.code && Number(data.code)>=400)throw new Error((data.msg||data.message||`API error ${data.code}`)+` (code ${data.code})`);
@@ -34,17 +35,17 @@ function findTaskId(data){
  return candidates.find(v=>typeof v==='string'||typeof v==='number')||null;
 }
 function extractUrls(data){
- let objects=[data?.data,data?.data?.result,data?.result,data?.data?.response,data];
+ let objects=[data?.data,data?.data?.result,data?.result,data?.data?.response,data?.data?.sunoData,data?.sunoData,data];
  const urls=[];
  for(const o of objects){
   if(!o)continue;
   let x=o.resultJson??o.result_json??o.response;
   if(typeof x==='string'){try{x=JSON.parse(x)}catch{}}
   if(x&&typeof x==='object')objects.push(x);
-  for(const k of ['resultUrls','audioUrls','audio_urls','audioUrl','audio_url','url','audio','tracks','songs','data']){
+  for(const k of ['resultUrls','audioUrls','audio_urls','audioUrl','audio_url','stream_audio_url','image_url','url','audio','tracks','songs','sunoData','data']){
    const v=o[k];
-   if(typeof v==='string'&&/^https?:\/\//i.test(v))urls.push({url:v,title:o.title||o.songTitle||o.name||''});
-   else if(Array.isArray(v))v.forEach(item=>{if(typeof item==='string'&&/^https?:\/\//i.test(item))urls.push({url:item,title:''});else if(item&&typeof item==='object'){const u=item.audioUrl||item.audio_url||item.url||item.streamAudioUrl||item.sourceAudioUrl;if(u)urls.push({url:u,title:item.title||item.songTitle||item.name||''})}});
+   if(typeof v==='string'&&/^https?:\/\//i.test(v))urls.push({url:v,title:o.title||o.songTitle||o.name||'',cover:o.image_url||o.imageUrl||''});
+   else if(Array.isArray(v))v.forEach(item=>{if(typeof item==='string'&&/^https?:\/\//i.test(item))urls.push({url:item,title:''});else if(item&&typeof item==='object'){const u=item.audioUrl||item.audio_url||item.stream_audio_url||item.streamAudioUrl||item.sourceAudioUrl||item.url;if(u)urls.push({url:u,title:item.title||item.songTitle||item.name||'',cover:item.image_url||item.imageUrl||''})}});
    else if(v&&typeof v==='object'){const u=v.audioUrl||v.audio_url||v.url;if(u)urls.push({url:u,title:v.title||v.name||''})}
   }
  }
@@ -55,6 +56,7 @@ function renderResultUrls(urls){
  if(!urls.length){const d=document.createElement('div');d.className='result-item';d.innerHTML='<b>Task selesai, tetapi URL audio belum terbaca</b><div class="result-meta">Lihat detail respons API di bawah atau cek task ID di dashboard provider.</div>';host.append(d);return}
  urls.forEach((item,i)=>{
   const row=document.createElement('div');row.className='result-item';
+  if(item.cover){const cover=document.createElement('img');cover.src=item.cover;cover.alt='Cover '+(item.title||`Track ${i+1}`);cover.style.width='96px';cover.style.height='96px';cover.style.objectFit='cover';cover.style.borderRadius='10px';row.append(cover)}
   const title=document.createElement('b');title.textContent=item.title||`Track ${i+1}`;
   const audio=document.createElement('audio');audio.controls=true;audio.preload='none';audio.src=item.url;
   const link=document.createElement('a');link.href=item.url;link.target='_blank';link.rel='noopener';link.textContent='Buka / download audio';
@@ -99,9 +101,13 @@ async function submitTask(model,input,title){
  if(!getKey())return;
  setBusy(true);showResultPanel(title,'Mengirim permintaan ke API...');
  try{
-  const response=await apiFetch('',{method:'POST',body:JSON.stringify({model,input})});
+  const workflow = model === 'suno/generate' ? 'generate' : (model === 'suno/upload-and-extend-audio' ? 'extend' : 'cover');
+  const key=getKey();
+  const createResponse=await fetch('/api/create',{method:'POST',headers:{'X-API-Key':key,'Content-Type':'application/json'},body:JSON.stringify({workflow,input})});
+  const response=await createResponse.json();
+  if(response.code!==200) throw new Error((response.msg||response.providerMessage||'Request gagal')+' (HTTP '+(response.upstreamStatus||response.code||createResponse.status)+')');
   const taskId=findTaskId(response);
-  if(!taskId){$('resultStatus').textContent='API merespons tetapi task ID tidak ditemukan: '+JSON.stringify(response).slice(0,500);toast('Respons API tidak memuat task ID');return}
+  if(!taskId){const immediate=extractUrls(response);if(immediate.length){renderResultUrls(immediate);$('resultStatus').textContent='Hasil musik diterima langsung dari EMIX';$('raw').textContent=JSON.stringify(response,null,2);$('rawBox').hidden=false;return}$('resultStatus').textContent='API merespons tetapi task ID tidak ditemukan: '+JSON.stringify(response).slice(0,500);toast('Respons API tidak memuat task ID');return}
   toast('Task berhasil dibuat');await pollTask(taskId,title);
  }catch(err){
   const message=err.message||'Unknown error';
