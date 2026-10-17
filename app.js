@@ -1,6 +1,6 @@
 (() => {
 const $=id=>document.getElementById(id);
-const API_BASE='https://api.emix.ai/api/v1/jobs';
+const API_BASE='https://api.emix.ai/api/v1/client/tasks';
 let apiKey='', request=null, pollTimer=null;
 const toast=(s)=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),3200)};
 document.querySelectorAll('.tab[data-page]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -21,8 +21,8 @@ async function apiFetch(path,options={}){
  const key=getKey();if(!key)throw new Error('API key belum dimasukkan');
  const response=await fetch(API_BASE+path,{...options,headers:{Authorization:'Bearer '+key,'Content-Type':'application/json',...(options.headers||{})}});
  const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{data={raw}};
- if(!response.ok)throw new Error(data.msg||data.message||data.error||`HTTP ${response.status}`);
- if(data.code && Number(data.code)>=400)throw new Error(data.msg||data.message||`API error ${data.code}`);
+ if(!response.ok)throw new Error((data.msg||data.message||data.error||`HTTP ${response.status}`)+` (HTTP ${response.status})`);
+ if(data.code && Number(data.code)>=400)throw new Error((data.msg||data.message||`API error ${data.code}`)+` (code ${data.code})`);
  return data;
 }
 function setBusy(busy){document.querySelectorAll('form .primary').forEach(b=>{b.disabled=busy;b.dataset.originalText ||= b.textContent;b.textContent=busy?'Mengirim...':b.dataset.originalText})}
@@ -67,7 +67,7 @@ async function pollTask(taskId,title){
  const started=Date.now(), maxWait=20*60*1000;
  async function check(){
   try{
-   const response=await apiFetch('/recordInfo?taskId='+encodeURIComponent(taskId),{method:'GET',headers:{'Content-Type':'application/json'}});
+   const response=await apiFetch('?taskId='+encodeURIComponent(taskId),{method:'GET',headers:{'Content-Type':'application/json'}});
    const d=response?.data||response;const state=String(d.state||d.status||d.data?.state||'unknown').toLowerCase();
    $('resultStatus').textContent=`Task ${taskId} · Status: ${state}`;
    if(['success','succeeded','completed','complete','finished'].includes(state)){
@@ -84,7 +84,7 @@ async function submitTask(model,input,title){
  if(!getKey())return;
  setBusy(true);showResultPanel(title,'Mengirim permintaan ke API...');
  try{
-  const response=await apiFetch('/createTask',{method:'POST',body:JSON.stringify({model,input})});
+  const response=await apiFetch('',{method:'POST',body:JSON.stringify({model,input})});
   const taskId=findTaskId(response);
   if(!taskId){$('resultStatus').textContent='API merespons tetapi task ID tidak ditemukan: '+JSON.stringify(response).slice(0,500);toast('Respons API tidak memuat task ID');return}
   toast('Task berhasil dibuat');await pollTask(taskId,title);
