@@ -61,19 +61,34 @@ function renderResultUrls(urls){
   row.append(title,audio,link);host.append(row);
  });
 }
+function findTaskRecord(response, taskId){
+ const root=response?.data??response;
+ const candidates=[];
+ const addArray=(v)=>{if(Array.isArray(v))candidates.push(...v);};
+ if(root&&typeof root==='object'){
+  addArray(root.records);addArray(root.list);addArray(root.rows);addArray(root.items);addArray(root.tasks);
+  addArray(root.data?.records);addArray(root.data?.list);addArray(root.data?.rows);addArray(root.data?.items);addArray(root.data?.tasks);
+  if(Array.isArray(root))candidates.push(...root);
+  if(root.taskId||root.task_id||root.id)candidates.push(root);
+ }
+ const wanted=String(taskId);
+ return candidates.find(x=>x&&String(x.taskId??x.task_id??x.id??x.taskID??'')===wanted)||null;
+}
 async function pollTask(taskId,title){
  showResultPanel(title,`Task dibuat: ${taskId}. Mengecek status setiap 4 detik...`);
  if(pollTimer)clearTimeout(pollTimer);
  const started=Date.now(), maxWait=20*60*1000;
  async function check(){
   try{
-   const response=await apiFetch('?taskId='+encodeURIComponent(taskId),{method:'GET',headers:{'Content-Type':'application/json'}});
-   const d=response?.data||response;const state=String(d.state||d.status||d.data?.state||'unknown').toLowerCase();
+   // Endpoint client/tasks adalah daftar berhalaman; API mewajibkan pageSize dan pageNum.
+   const response=await apiFetch('?pageSize=50&pageNum=1&taskId='+encodeURIComponent(taskId),{method:'GET',headers:{'Content-Type':'application/json'}});
+   const d=findTaskRecord(response,taskId)||response?.data?.task||response?.task||response?.data||response;
+   const state=String(d.state||d.status||d.taskStatus||d.task_status||d.data?.state||'unknown').toLowerCase();
    $('resultStatus').textContent=`Task ${taskId} · Status: ${state}`;
-   if(['success','succeeded','completed','complete','finished'].includes(state)){
-    const urls=extractUrls(response);renderResultUrls(urls);$('resultStatus').textContent=`Selesai · Task ${taskId}`;toast('Musik selesai diproses');return;
+   if(['success','succeeded','completed','complete','finished','2'].includes(state)){
+    const urls=extractUrls(d);renderResultUrls(urls);$('resultStatus').textContent=`Selesai · Task ${taskId}`;toast('Musik selesai diproses');return;
    }
-   if(['fail','failed','error'].includes(state)){const msg=d.failReason||d.errorMessage||d.message||response.msg||'Proses gagal';$('resultStatus').textContent=`Gagal: ${msg}`;toast('API gagal memproses task');return}
+   if(['fail','failed','failure','error','3'].includes(state)){const msg=d.failReason||d.fail_reason||d.errorMessage||d.error_message||d.message||response.msg||'Proses gagal';$('resultStatus').textContent=`Gagal: ${msg}`;toast('API gagal memproses task');return}
    if(Date.now()-started>maxWait){$('resultStatus').textContent=`Timeout menunggu hasil. Task ID: ${taskId}`;return}
    pollTimer=setTimeout(check,4000);
   }catch(err){$('resultStatus').textContent=`Tidak bisa cek status: ${err.message}. Akan mencoba lagi...`;if(Date.now()-started<maxWait)pollTimer=setTimeout(check,6000)}
