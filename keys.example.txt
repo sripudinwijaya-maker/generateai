@@ -1,0 +1,6 @@
+# Salin file ini jadi keys.txt (hanya untuk dipakai di komputer sendiri).
+# Satu API key per baris. Baris diawali # diabaikan.
+# JANGAN upload keys.txt ke GitHub. File ini sudah masuk .gitignore.
+isi_api_key_1
+isi_api_key_2
+isi_api_key_3

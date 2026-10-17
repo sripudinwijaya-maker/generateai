@@ -1,4 +1,4 @@
 .env
+keys.txt
 node_modules
 .vercel
-keys.txt
