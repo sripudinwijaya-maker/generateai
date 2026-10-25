@@ -493,9 +493,9 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   // ---------- Voice Studio tambahan; workflow lama tidak diubah ----------
   function voiceInput(action) {
     var input = {};
-    if (action === "validate") input = {voiceUrl:$ ("vsVoiceUrl").value.trim(), vocalStartS:Number($("vsStart").value), vocalEndS:Number($("vsEnd").value), language:"en"};
-    if (action === "regenerate") input = {taskId:$ ("vsTask").value.trim()};
-    if (action === "create") input = {taskId:$ ("vsTask").value.trim(), verifyUrl:$ ("vsVerifyUrl").value.trim(), voiceName:$ ("vsName").value.trim(), description:$ ("vsDescription").value.trim(), style:$ ("vsStyle").value.trim(), singerSkillLevel:$ ("vsSkill").value};
+    if (action === "validate") input = {voiceUrl:$("vsVoiceUrl").value.trim(), vocalStartS:Number($("vsStart").value), vocalEndS:Number($("vsEnd").value), language:"en"};
+    if (action === "regenerate") input = {taskId:$("vsTask").value.trim()};
+    if (action === "create") input = {taskId:$("vsTask").value.trim(), verifyUrl:$("vsVerifyUrl").value.trim(), voiceName:$("vsName").value.trim(), description:$ ("vsDescription").value.trim(), style:$ ("vsStyle").value.trim(), singerSkillLevel:$ ("vsSkill").value};
     if (action === "check") input = {taskId:$ ("vsVoiceTask").value.trim()};
     return input;
   }
@@ -505,7 +505,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     setState("wait","Voice Studio","Mengirim " + action + "…");
     try {
       var j=null; for(var i=0;i<keys.length;i++){activeOwnKey=keys[i];var r=await fetch("/api/voice",{method:"POST",headers:headers(true),body:JSON.stringify({action:action,input:voiceInput(action)})});j=await r.json();if(j.code===200)break;if(j.code!==401&&j.code!==402)break;}
-      if(!j||j.code!==200) return fail(j?j.code:500,j&&j.msg);
+      if(!j||j.code!==200) { var detail=j&&((j.msg||j.message||j.failMsg||"")+(j.upstreamStatus?" · HTTP upstream "+j.upstreamStatus:"")); if(j&&j.data) detail += "\n"+JSON.stringify(j.data); return fail(j?j.code:500,detail||"Request Voice Studio gagal. Periksa respons mentah."); }
       var task=j.data&&j.data.taskId;if(!task) { $("raw").textContent=JSON.stringify(j,null,2);$("rawBox").hidden=false;return setState("ok","Dikirim","Respons tidak berisi taskId; lihat respons mentah."); }
       if(action==="validate"||action==="regenerate") { $("vsTask").value=task; await voicePoll(task,action); }
       else if(action==="create") { $("vsVoiceTask").value=task; setState("ok","Create Voice dikirim","Task ID: "+task+". Tunggu status task, lalu cek Voice ID."); }
@@ -520,7 +520,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   $("vsRegen").addEventListener("click",function(){voiceRequest("regenerate").catch(function(e){fail(0,e.message)});});
   $("vsCreate").addEventListener("click",function(){voiceRequest("create").catch(function(e){fail(0,e.message)});});
   $("vsCheck").addEventListener("click",function(){voiceRequest("check").catch(function(e){fail(0,e.message)});});
-  $("vsSave").addEventListener("click",function(){var id=$("vsVoiceId").value.trim();if(!id)return setState("err","Gagal","Voice ID kosong.",true);var saved=load("sc_voice_ids");var arr=[];try{arr=JSON.parse(saved||"[]")}catch(e){};if(!arr.some(function(x){return x.id===id}))arr.push({id:id,name:$ ("vsName").value.trim()||id});store("sc_voice_ids",JSON.stringify(arr));$("personaId").value=id;$("vsSaved").textContent="Voice ID tersimpan di browser dan dimasukkan ke field Custom Voice lama.";setState("ok","Voice ID disimpan","ID tersimpan lokal di browser.");});
+  $("vsSave").addEventListener("click",function(){var id=$("vsVoiceId").value.trim();if(!id)return setState("err","Gagal","Voice ID kosong.",true);var saved=load("sc_voice_ids");var arr=[];try{arr=JSON.parse(saved||"[]")}catch(e){};if(!arr.some(function(x){return x.id===id}))arr.push({id:id,name:$("vsName").value.trim()||id});store("sc_voice_ids",JSON.stringify(arr));$("personaId").value=id;$("vsSaved").textContent="Voice ID tersimpan di browser dan dimasukkan ke field Custom Voice lama.";setState("ok","Voice ID disimpan","ID tersimpan lokal di browser.");});
   (function(){try{var arr=JSON.parse(load("sc_voice_ids")||"[]");$("vsSaved").textContent=arr.length?arr.length+" Voice ID tersimpan di browser.":"Belum ada Voice ID tersimpan.";}catch(e){}})();
 
   $("form").addEventListener("submit", async function (ev) {
