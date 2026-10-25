@@ -212,7 +212,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       </div>
       <div class="field">
         <label for="workflow">Studio</label>
-        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
+        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="voiceGenerate">🎤 Generate Music pakai Custom Voice</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
         <div class="hint">Pilih Generate Music, Cover Audio, atau Cover Extend.</div>
       </div>
 
@@ -220,6 +220,12 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       <div class="field">
         <label for="model">Model</label>
         <select id="model"><option>V6</option><option>V6_WILD</option><option>V6_MINI</option></select>
+      </div>
+
+      <div class="field" id="personaField" hidden>
+        <label for="personaId">Custom Voice ID <span class="hint">(persona_id / voiceId)</span></label>
+        <input type="text" id="personaId" maxlength="200" placeholder="Tempel ID custom voice yang sudah dibuat">
+        <div class="hint">Gunakan ID voice yang sudah berhasil dibuat dan tersedia. Voice ID tidak dibuat otomatis di menu ini.</div>
       </div>
 
       <div class="field" id="sourceAudioField">
@@ -320,11 +326,12 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   // ---------- Form ----------
   function refreshWorkflow() {
     var w = $("workflow").value;
-    var generate = w === "generate", extend = w === "extend";
+    var generate = w === "generate" || w === "voiceGenerate", voiceGenerate = w === "voiceGenerate", extend = w === "extend";
     $("sourceAudioField").hidden = generate;
+    $("personaField").hidden = !voiceGenerate;
     $("uploadUrl").required = !generate;
     $("continueAtField").hidden = !extend;
-    $("go").textContent = generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
+    $("go").textContent = voiceGenerate ? "Generate pakai Custom Voice" : generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
     $("durationField").hidden = !generate;
   }
   $("workflow").addEventListener("change", refreshWorkflow);
@@ -468,7 +475,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     ownKeyList = parseKeys($("ownKey").value);
     if (!ownKeyList.length) return setState("err", "Gagal", "Masukkan API key sendiri atau upload file TXT.", true);
     var workflow = $("workflow").value;
-    if (workflow !== "generate" && !/^https?:\/\//i.test($("uploadUrl").value.trim())) return setState("err", "Gagal", "Masukkan URL audio publik yang valid.", true);
+    if (!["generate", "voiceGenerate"].includes(workflow) && !/^https?:\/\//i.test($("uploadUrl").value.trim())) return setState("err", "Gagal", "Masukkan URL audio publik yang valid.", true);
     var input = {
       model: $("model").value,
       uploadUrl: $("uploadUrl").value.trim(),
@@ -479,11 +486,12 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       negativeTags: $("negativeTags").value.trim(),
       styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65
     };
-    if (workflow === "generate") input.duration = Number($("duration").value);
+    if (workflow === "generate" || workflow === "voiceGenerate") input.duration = Number($("duration").value);
+    if (workflow === "voiceGenerate") input.personaId = $("personaId").value.trim();
     if (workflow === "extend") input.continueAt = Number($("continueAt").value);
     if (workflow !== "generate") input.model = "V6";
     if (!input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
-    if (workflow === "generate") delete input.uploadUrl;
+    if (workflow === "generate" || workflow === "voiceGenerate") delete input.uploadUrl;
     $("go").disabled = true;
     setState("wait", "Mengirim", "Membuat tugas…");
     try {
