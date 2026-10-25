@@ -212,8 +212,8 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       </div>
       <div class="field">
         <label for="workflow">Studio</label>
-        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="voiceGenerate">🎤 Generate Music pakai Custom Voice</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option><option value="voiceStudio">🎙️ Voice Studio (baru)</option></select>
-        <div class="hint">Pilih Generate Music, Cover Audio, atau Cover Extend.</div>
+        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option><option value="voiceStudio">🎙️ Voice Studio (baru)</option></select>
+        <div class="hint">Pilih Generate Music, Cover Audio, Cover Extend, atau Voice Studio.</div>
       </div>
 
       <div id="sunoFields">
@@ -345,15 +345,15 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   // ---------- Form ----------
   function refreshWorkflow() {
     var w = $("workflow").value;
-    var generate = w === "generate" || w === "voiceGenerate", voiceGenerate = w === "voiceGenerate", extend = w === "extend", voiceStudio = w === "voiceStudio";
+    var generate = w === "generate", extend = w === "extend", voiceStudio = w === "voiceStudio";
     $("sourceAudioField").hidden = generate || voiceStudio;
     $("sunoFields").hidden = voiceStudio;
     $("voiceStudioFields").hidden = !voiceStudio;
     $("go").hidden = voiceStudio;
-    $("personaField").hidden = !voiceGenerate;
+    $("personaField").hidden = true;
     $("uploadUrl").required = !generate;
     $("continueAtField").hidden = !extend;
-    $("go").textContent = voiceGenerate ? "Generate pakai Custom Voice" : generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
+    $("go").textContent = generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
     $("durationField").hidden = !generate;
   }
   $("workflow").addEventListener("change", refreshWorkflow);
@@ -520,7 +520,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   $("vsRegen").addEventListener("click",function(){voiceRequest("regenerate").catch(function(e){fail(0,e.message)});});
   $("vsCreate").addEventListener("click",function(){voiceRequest("create").catch(function(e){fail(0,e.message)});});
   $("vsCheck").addEventListener("click",function(){voiceRequest("check").catch(function(e){fail(0,e.message)});});
-  $("vsSave").addEventListener("click",function(){var id=$("vsVoiceId").value.trim();if(!id)return setState("err","Gagal","Voice ID kosong.",true);var saved=load("sc_voice_ids");var arr=[];try{arr=JSON.parse(saved||"[]")}catch(e){};if(!arr.some(function(x){return x.id===id}))arr.push({id:id,name:$("vsName").value.trim()||id});store("sc_voice_ids",JSON.stringify(arr));$("personaId").value=id;$("vsSaved").textContent="Voice ID tersimpan di browser dan dimasukkan ke field Custom Voice lama.";setState("ok","Voice ID disimpan","ID tersimpan lokal di browser.");});
+  $("vsSave").addEventListener("click",function(){var id=$("vsVoiceId").value.trim();if(!id)return setState("err","Gagal","Voice ID kosong.",true);var saved=load("sc_voice_ids");var arr=[];try{arr=JSON.parse(saved||"[]")}catch(e){};if(!arr.some(function(x){return x.id===id}))arr.push({id:id,name:$("vsName").value.trim()||id});store("sc_voice_ids",JSON.stringify(arr));$("personaId").value=id;$("vsSaved").textContent="Voice ID tersimpan di browser dan otomatis dipakai saat Generate Music.";setState("ok","Voice ID disimpan","ID tersimpan lokal di browser.");});
   (function(){try{var arr=JSON.parse(load("sc_voice_ids")||"[]");$("vsSaved").textContent=arr.length?arr.length+" Voice ID tersimpan di browser.":"Belum ada Voice ID tersimpan.";}catch(e){}})();
 
   $("form").addEventListener("submit", async function (ev) {
@@ -531,7 +531,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     if (!ownKeyList.length) return setState("err", "Gagal", "Masukkan API key sendiri atau upload file TXT.", true);
     var workflow = $("workflow").value;
     if (workflow === "voiceStudio") return;
-    if (["generate", "voiceGenerate"].includes(workflow) && !/^https?:\/\//i.test($("uploadUrl").value.trim())) return setState("err", "Gagal", "Masukkan URL audio publik yang valid.", true);
+    if (["generate"].includes(workflow) && !/^https?:\/\//i.test($("uploadUrl").value.trim())) return setState("err", "Gagal", "Masukkan URL audio publik yang valid.", true);
     var input = {
       model: $("model").value,
       uploadUrl: $("uploadUrl").value.trim(),
@@ -542,12 +542,11 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       negativeTags: $("negativeTags").value.trim(),
       styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65
     };
-    if (workflow === "generate" || workflow === "voiceGenerate") input.duration = Number($("duration").value);
-    if (workflow === "voiceGenerate") input.personaId = $("personaId").value.trim();
+    if (workflow === "generate") { input.duration = Number($("duration").value); var savedVoice = $("vsVoiceId").value.trim(); if (savedVoice) input.personaId = savedVoice; }
     if (workflow === "extend") input.continueAt = Number($("continueAt").value);
     if (workflow !== "generate") input.model = "V6";
     if (!input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
-    if (workflow === "generate" || workflow === "voiceGenerate") delete input.uploadUrl;
+    if (workflow === "generate") delete input.uploadUrl;
     $("go").disabled = true;
     setState("wait", "Mengirim", "Membuat tugas…");
     try {
