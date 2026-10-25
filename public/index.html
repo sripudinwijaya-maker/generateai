@@ -276,10 +276,10 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
       <div id="voiceStudioFields" hidden>
         <h2>🎙️ Custom Voice Studio</h2>
-        <div class="field"><label for="vsVoiceUrl">URL rekaman suara asli</label><input type="url" id="vsVoiceUrl" placeholder="https://.../vokal.mp3"><div class="hint">Gunakan rekaman vokal bersih / acapella yang dapat diakses publik.</div></div>
+        <div class="field"><label for="vsVoiceUrl">URL rekaman suara asli</label><input type="url" id="vsVoiceUrl" placeholder="https://.../vokal.mp3"><div class="hint">Gunakan vokal bersih/acapella yang bisa diakses publik. Setelah kalimat muncul, rekam dengan suara bicara (jangan dinyanyikan) dan tempel URL. API menentukan bahasa kalimat verifikasi; baca persis seperti yang tampil.</div></div>
         <div class="row"><div class="field"><label for="vsStart">Vokal mulai (detik)</label><input type="number" id="vsStart" min="0" step="0.1" value="0"></div><div class="field"><label for="vsEnd">Vokal selesai (detik)</label><input type="number" id="vsEnd" min="0.1" step="0.1" value="10"></div></div>
         <button type="button" class="go" id="vsValidate">1. Buat kalimat verifikasi</button>
-        <div class="field" style="margin-top:16px"><label for="vsTask">Task ID validasi</label><input type="text" id="vsTask" placeholder="Task ID dari validasi"><div class="hint">Task ID otomatis diisi setelah phrase berhasil dibuat.</div></div>
+        <div class="field" style="margin-top:16px"><label for="vsTask">Task ID validasi</label><input type="text" id="vsTask" placeholder="Task ID dari validasi"><div class="hint">Task ID diisi otomatis. Biasanya tidak perlu mengubahnya.</div></div>
         <div class="field"><label for="vsPhrase">Kalimat verifikasi</label><textarea id="vsPhrase" readonly placeholder="Kalimat akan muncul di sini setelah task selesai"></textarea></div>
         <button type="button" class="go" id="vsRegen">↻ Buat ulang kalimat</button>
         <div class="field" style="margin-top:16px"><label for="vsVerifyUrl">URL rekaman membaca kalimat verifikasi</label><input type="url" id="vsVerifyUrl" placeholder="https://.../verification.mp3"></div>
@@ -287,11 +287,11 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <div class="field"><label for="vsDescription">Deskripsi</label><input type="text" id="vsDescription" maxlength="500" placeholder="Dibuat dari rekaman vokal sendiri"></div>
         <div class="field"><label for="vsStyle">Style</label><input type="text" id="vsStyle" maxlength="500" placeholder="Pop, female vocal"></div>
         <div class="field"><label for="vsSkill">Skill penyanyi</label><select id="vsSkill"><option>beginner</option><option>intermediate</option><option>advanced</option><option>professional</option></select></div>
-        <button type="button" class="go" id="vsCreate">2. Buat Custom Voice</button>
+        <button type="button" class="go" id="vsCreate">2. Buat Custom Voice (otomatis cek & simpan)</button>
         <div class="field" style="margin-top:16px"><label for="vsVoiceTask">Task ID Create Voice</label><input type="text" id="vsVoiceTask" placeholder="Task ID create voice"></div>
-        <button type="button" class="go" id="vsCheck">3. Cek Voice siap digunakan</button>
+        <button type="button" class="go" id="vsCheck">3. Cek Voice (otomatis)</button>
         <div class="field" style="margin-top:16px"><label for="vsVoiceId">Voice ID / persona_id</label><input type="text" id="vsVoiceId" placeholder="Voice ID hasil create"></div>
-        <button type="button" class="go" id="vsSave">Simpan Voice ID di browser</button><div class="hint" id="vsSaved"></div>
+        <button type="button" class="go" id="vsSave">Simpan Voice ID (otomatis)</button><div class="hint" id="vsSaved"></div>
       </div>
       <button class="go" id="go" type="submit">Generate</button>
     </form>
