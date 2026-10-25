@@ -10,12 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* Tema: semua warna dari token. Default Neon; tema lain lewat data-theme di <html> */
+/* Tema Black / Orange / Gold — seluruh palet tetap dalam keluarga warna ini */
 :root {
-  --bg: #090a1a; --panel: rgba(18,20,46,.62); --input: rgba(5,6,22,.65);
-  --fg: #eaf0ff; --muted: #8f9bc4; --line: rgba(140,160,255,.22);
-  --accent: #00e5ff; --accent2: #ff3df0; --accent-fg: #04101a;
-  --rec: #ff4d6d; --ok: #3dffb0; --glow: rgba(0,229,255,.38);
-  --g1: rgba(0,229,255,.16); --g2: rgba(255,61,240,.16);
+  --bg: #080808; --panel: rgba(24,20,14,.88); --input: rgba(8,8,8,.94);
+  --fg: #fff5df; --muted: #c0a878; --line: rgba(255,174,55,.26);
+  --accent: #ff8618; --accent2: #ffd36a; --accent-fg: #170b00;
+  --rec: #ff5c45; --ok: #eac15a; --glow: rgba(255,145,25,.36);
+  --g1: rgba(255,132,20,.19); --g2: rgba(255,207,91,.13);
   --radius: 14px; --blur: blur(14px);
   --f-display: "Unbounded", system-ui, sans-serif;
   --f-body: "Instrument Sans", system-ui, sans-serif;
@@ -23,36 +24,36 @@
   color-scheme: dark;
 }
 :root[data-theme="sunset"] {
-  --bg: #19090f; --panel: rgba(46,17,30,.64); --input: rgba(22,6,12,.62);
-  --fg: #fff0e6; --muted: #d4a39d; --line: rgba(255,150,120,.24);
-  --accent: #ff8a4c; --accent2: #ff3d77; --accent-fg: #210a05;
-  --rec: #ff5470; --ok: #5be3a1; --glow: rgba(255,110,70,.38);
-  --g1: rgba(255,138,76,.17); --g2: rgba(255,61,119,.17);
+  --bg:#090706; --panel:rgba(32,17,9,.9); --input:rgba(10,7,5,.95);
+  --fg:#fff0df; --muted:#d1a27e; --line:rgba(255,121,35,.28);
+  --accent:#ff6b1a; --accent2:#ffc04d; --accent-fg:#1a0800;
+  --rec:#ff5848; --ok:#f2bd50; --glow:rgba(255,103,24,.4);
+  --g1:rgba(255,99,20,.2); --g2:rgba(255,190,58,.12);
 }
 :root[data-theme="terminal"] {
-  --bg: #040704; --panel: rgba(7,16,8,.88); --input: rgba(0,8,2,.9);
-  --fg: #c4ffc9; --muted: #62a56a; --line: rgba(57,255,106,.3);
-  --accent: #39ff6a; --accent2: #1fd9a8; --accent-fg: #021005;
-  --rec: #ff5f5f; --ok: #39ff6a; --glow: rgba(57,255,106,.3);
-  --g1: rgba(57,255,106,.08); --g2: rgba(31,217,168,.07);
+  --bg:#050605; --panel:rgba(20,19,12,.94); --input:rgba(5,5,4,.96);
+  --fg:#fff3c9; --muted:#b5a16c; --line:rgba(255,196,70,.3);
+  --accent:#ff9a1f; --accent2:#ffe078; --accent-fg:#1b0d00;
+  --rec:#ff6049; --ok:#f0c45c; --glow:rgba(255,174,25,.32);
+  --g1:rgba(255,164,24,.12); --g2:rgba(255,216,90,.08);
   --radius: 2px; --blur: none;
   --f-display: "IBM Plex Mono", ui-monospace, monospace;
   --f-body: "IBM Plex Mono", ui-monospace, monospace;
 }
 :root[data-theme="ocean"] {
-  --bg: #04131b; --panel: rgba(8,38,54,.62); --input: rgba(2,16,24,.65);
-  --fg: #e2f6ff; --muted: #84b3c6; --line: rgba(110,200,230,.24);
-  --accent: #3de0cb; --accent2: #4d8bff; --accent-fg: #03191a;
-  --rec: #ff6b81; --ok: #4ee3b5; --glow: rgba(61,224,203,.36);
-  --g1: rgba(61,224,203,.15); --g2: rgba(77,139,255,.17);
+  --bg:#080909; --panel:rgba(19,22,20,.9); --input:rgba(6,8,7,.95);
+  --fg:#f8f0dc; --muted:#b5a47d; --line:rgba(230,174,75,.26);
+  --accent:#f28b26; --accent2:#f6d477; --accent-fg:#170b00;
+  --rec:#ff6250; --ok:#e9c05d; --glow:rgba(242,139,38,.32);
+  --g1:rgba(242,139,38,.14); --g2:rgba(246,212,119,.1);
 }
 :root[data-theme="studio"] {
-  --bg: #eceef6; --panel: rgba(255,255,255,.78); --input: #ffffff;
-  --fg: #14161f; --muted: #5a6075; --line: #cdd2e0;
-  --accent: #2b55f5; --accent2: #8a3dff; --accent-fg: #ffffff;
-  --rec: #d6303f; --ok: #12805c; --glow: rgba(43,85,245,.28);
-  --g1: rgba(43,85,245,.12); --g2: rgba(138,61,255,.12);
-  color-scheme: light;
+  --bg:#0b0906; --panel:rgba(29,23,14,.9); --input:#100d08;
+  --fg:#fff5dd; --muted:#c3ad7b; --line:rgba(255,202,91,.28);
+  --accent:#ff941f; --accent2:#ffe08a; --accent-fg:#1a0b00;
+  --rec:#ff5b45; --ok:#f2c65b; --glow:rgba(255,148,31,.34);
+  --g1:rgba(255,148,31,.14); --g2:rgba(255,224,138,.12);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -69,7 +70,7 @@ body {
 
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 18px 24px; margin-bottom: 18px; }
 h1 { font: 700 clamp(1.8rem, 6vw, 3rem)/1.02 var(--f-display); letter-spacing: -0.03em; margin: 0 0 8px; text-wrap: balance; }
-.grad { color: var(--accent); background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.grad { color: var(--accent); background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent)); background-size: 200% 100%; animation: gold-sweep 5s ease-in-out infinite; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .sub { color: var(--muted); margin: 0; max-width: 56ch; }
 
 .themes { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -91,12 +92,14 @@ h1 { font: 700 clamp(1.8rem, 6vw, 3rem)/1.02 var(--f-display); letter-spacing: -
 }
 html.busy .eq span { opacity: 1; animation-duration: calc(var(--d, 1.6s) * .38); box-shadow: 0 0 12px -2px var(--glow); }
 @keyframes eq { from { transform: scaleY(var(--lo, .3)); } to { transform: scaleY(var(--hi, .9)); } }
+@keyframes gold-sweep { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
 .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .panel {
+  position: relative; overflow: hidden;
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; min-width: 0;
   -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  box-shadow: 0 18px 50px -28px var(--glow);
+  box-shadow: 0 18px 50px -28px var(--glow); animation: panel-glow 7s ease-in-out infinite alternate;
 }
 .panel h2 { font: 500 12px var(--f-data); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 16px; }
 label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
@@ -128,7 +131,7 @@ button.go {
   background: linear-gradient(90deg, var(--accent), var(--accent2)); color: var(--accent-fg); cursor: pointer;
   box-shadow: 0 12px 32px -12px var(--glow); transition: transform .15s ease, filter .15s ease;
 }
-button.go:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+button.go:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.12); box-shadow: 0 14px 38px -10px var(--glow); }
 button.go:disabled { opacity: .55; cursor: wait; }
 .state { display: flex; align-items: center; gap: 10px; font: 500 14px var(--f-data); margin-bottom: 14px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); flex: none; }
@@ -136,6 +139,7 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .state.ok .dot { background: var(--ok); box-shadow: 0 0 12px var(--ok); }
 .state.err .dot { background: var(--rec); box-shadow: 0 0 12px var(--rec); }
 @keyframes pulse { 50% { opacity: .25; } }
+@keyframes panel-glow { from { box-shadow: 0 18px 50px -30px var(--glow); border-color: var(--line); } to { box-shadow: 0 18px 56px -24px var(--glow); border-color: color-mix(in srgb, var(--accent2) 42%, var(--line)); } }
 .msg { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
 .msg.err { color: var(--rec); }
 .track { border: 1px solid var(--line); border-radius: calc(var(--radius) * .6); padding: 12px; margin-bottom: 12px; background: var(--input); }
@@ -143,14 +147,14 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .track a { font: 500 13px var(--f-data); color: var(--accent); }
 
 .cassette-player { border:1px solid var(--line); border-radius:14px; padding:12px; margin:8px 0 12px; background:linear-gradient(145deg,var(--g1),var(--input)); }
-.cassette { max-width:280px; margin:0 auto 12px; padding:12px 14px 9px; border:2px solid var(--line); border-radius:12px; background:linear-gradient(145deg,#313747,#151a28 65%,#252b3b); color:#e9f0ff; box-shadow:inset 0 1px 0 #ffffff22,0 8px 20px #0005; }
-.cassette-label { display:flex; justify-content:space-between; font:600 10px var(--f-data); letter-spacing:.12em; padding:5px 7px; border-radius:4px; background:linear-gradient(90deg,#e9e5d7,#bfc9d6); color:#202536; }
+.cassette { max-width:280px; margin:0 auto 12px; padding:12px 14px 9px; border:2px solid var(--line); border-radius:12px; background:linear-gradient(145deg,#4a2b0e,#17100a 65%,#30200b); color:#fff1cc; box-shadow:inset 0 1px 0 #ffffff22,0 8px 20px #0005; }
+.cassette-label { display:flex; justify-content:space-between; font:600 10px var(--f-data); letter-spacing:.12em; padding:5px 7px; border-radius:4px; background:linear-gradient(90deg,#ffe8a3,#d99a35); color:#211204; }
 .tape-side { font-weight:500; }
 .reels { display:flex; align-items:center; justify-content:space-around; gap:10px; padding:10px 5px 6px; }
-.reel { display:block; width:54px; height:54px; border:5px solid #abb4c6; border-radius:50%; position:relative; background:repeating-conic-gradient(#677083 0deg 12deg,#303747 12deg 24deg); box-shadow:0 0 0 3px #111722,inset 0 0 0 5px #202735; }
-.reel b { position:absolute; width:15px; height:15px; border-radius:50%; background:#c9d0dd; border:4px solid #6d7789; top:50%; left:50%; transform:translate(-50%,-50%); }
-.tape-window { height:25px; flex:1; border:2px solid #8993a5; border-radius:4px; background:linear-gradient(180deg,#0a0e17,#3c2634); box-shadow:inset 0 0 8px #000; }
-.tape-bottom { border-top:1px solid #ffffff28; padding-top:6px; text-align:center; font:9px var(--f-data); letter-spacing:.16em; color:#aeb8c9; }
+.reel { display:block; width:54px; height:54px; border:5px solid #e7b85d; border-radius:50%; position:relative; background:repeating-conic-gradient(#c88b32 0deg 12deg,#4b2d0d 12deg 24deg); box-shadow:0 0 0 3px #100a03,inset 0 0 0 5px #38220a; }
+.reel b { position:absolute; width:15px; height:15px; border-radius:50%; background:#ffe3a0; border:4px solid #b77a22; top:50%; left:50%; transform:translate(-50%,-50%); }
+.tape-window { height:25px; flex:1; border:2px solid #c99b4b; border-radius:4px; background:linear-gradient(180deg,#090704,#4a2b0c); box-shadow:inset 0 0 8px #000; }
+.tape-bottom { border-top:1px solid #ffffff28; padding-top:6px; text-align:center; font:9px var(--f-data); letter-spacing:.16em; color:#e3c27b; }
 .cassette.spinning .reel { animation:reel-spin 1.2s linear infinite; }
 @keyframes reel-spin { to { transform:rotate(360deg); } }
 .tape-controls { display:flex; align-items:center; gap:10px; }
@@ -170,7 +174,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   .eq { height: 44px; gap: 3px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .eq span, html.busy .eq span, .state.wait .dot { animation: none; }
+  .eq span, html.busy .eq span, .state.wait .dot, .panel, .grad { animation: none; }
   button.go, button.go:hover:not(:disabled) { transition: none; transform: none; }
 }
 </style>
@@ -183,11 +187,11 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       <p class="sub">Unggah lagu referensi lewat link, pilih gaya baru, lalu biarkan AI menyanyikannya ulang sebagai cover.</p>
     </div>
     <div class="themes" id="themes" role="group" aria-label="Tema tampilan">
-      <button type="button" data-t="neon" style="--c1:#00e5ff;--c2:#ff3df0"><i></i>Neon</button>
-      <button type="button" data-t="sunset" style="--c1:#ff8a4c;--c2:#ff3d77"><i></i>Sunset</button>
-      <button type="button" data-t="terminal" style="--c1:#39ff6a;--c2:#1fd9a8"><i></i>Terminal</button>
-      <button type="button" data-t="ocean" style="--c1:#3de0cb;--c2:#4d8bff"><i></i>Ocean</button>
-      <button type="button" data-t="studio" style="--c1:#2b55f5;--c2:#8a3dff"><i></i>Studio</button>
+      <button type="button" data-t="neon" style="--c1:#ff8618;--c2:#ffd36a"><i></i>Gold</button>
+      <button type="button" data-t="sunset" style="--c1:#ff6b1a;--c2:#ffc04d"><i></i>Ember</button>
+      <button type="button" data-t="terminal" style="--c1:#ff9a1f;--c2:#ffe078"><i></i>Amber</button>
+      <button type="button" data-t="ocean" style="--c1:#f28b26;--c2:#f6d477"><i></i>Bronze</button>
+      <button type="button" data-t="studio" style="--c1:#ff941f;--c2:#ffe08a"><i></i>Luxury</button>
     </div>
   </header>
   <div class="eq" id="eq" aria-hidden="true"></div>
