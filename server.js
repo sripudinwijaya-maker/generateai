@@ -12,7 +12,7 @@ try {
   });
 } catch (e) { /* .env opsional */ }
 
-const { handleLogin, handleCreate, handleStatus, handleInfo, send } = require("./lib/handlers");
+const { handleCreate, handleStatus, handleInfo, send } = require("./lib/handlers");
 const PORT = process.env.PORT || 3000;
 
 http.createServer((req, res) => {
