@@ -31,4 +31,3 @@ Aplikasi tidak menggunakan key default server. Key dikirim ke backend melalui he
 - Batas default Emix: 20 request baru per 10 detik.
 - Key yang diunggah TXT dibaca di browser dan dicoba berurutan jika Emix mengembalikan 401 atau 402.
 
-\n## Generate Music dengan Custom Voice\n\nMenu **🎤 Generate Music pakai Custom Voice** menerima `personaId` (atau voice ID yang dikembalikan API) dari custom voice yang sudah dibuat. Masukkan ID tersebut, lalu generate musik dengan model `suno/generate`. Pastikan voice telah berhasil dibuat dan availability bernilai `true`.\n\nCatatan: aplikasi ini belum menyertakan alur create/verify custom voice; menu ini memakai voice ID yang sudah tersedia. Dukungan `personaId` bergantung pada model/API akun Emix yang digunakan.\n
