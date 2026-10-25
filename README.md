@@ -1,6 +1,6 @@
 # Studio Cover
 
-Web generator Suno/Kling dengan halaman login. API key disimpan di server dan tidak dimasukkan pengguna ke halaman website. Setiap akun hanya memakai API key yang didaftarkan untuk akun tersebut.
+Web generator musik Suno dengan halaman login. API key disimpan di server dan tidak dimasukkan pengguna ke halaman website. Setiap akun hanya memakai API key yang didaftarkan untuk akun tersebut.
 
 ## Cara mendaftarkan user di Vercel
 
