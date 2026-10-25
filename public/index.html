@@ -194,8 +194,8 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
       <div class="field">
         <label for="workflow">Studio</label>
-        <select id="workflow"><option value="kling">🎬 Kling Motion</option><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
-        <div class="hint">Pilih salah satu dari empat fitur.</div>
+        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
+        <div class="hint">Pilih salah satu dari tiga fitur.</div>
       </div>
 
       <div id="sunoFields">
@@ -250,35 +250,6 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
       </div><!-- /sunoFields -->
 
-      <div id="klingFields" hidden>
-        <div class="field">
-          <label for="klingImageUrl">URL gambar karakter</label>
-          <input type="url" id="klingImageUrl" placeholder="https://.../gambar.png">
-          <div class="hint">JPG/JPEG/PNG, maksimal 10 MB, dimensi lebih dari 300 px, rasio 2:5 sampai 5:2.</div>
-        </div>
-        <div class="field">
-          <label for="klingVideoUrl">URL video gerakan</label>
-          <input type="url" id="klingVideoUrl" placeholder="https://.../gerakan.mp4">
-          <div class="hint">MP4 atau MOV, maksimal 100 MB. File harus punya URL publik yang bisa diakses Emix.</div>
-        </div>
-        <div class="field">
-          <label for="klingPrompt">Prompt (opsional)</label>
-          <textarea id="klingPrompt" maxlength="2500" placeholder="The character is dancing.">The character is dancing.</textarea>
-          <div class="count"><span id="klingPromptCount">26</span> / 2500</div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <label for="klingOrientation">Orientasi karakter</label>
-            <select id="klingOrientation"><option value="video">Mengikuti video (maks. 30 detik)</option><option value="image">Mengikuti gambar (maks. 10 detik)</option></select>
-          </div>
-          <div class="field">
-            <label for="klingMode">Resolusi</label>
-            <select id="klingMode"><option value="720p">720p</option><option value="1080p">1080p</option></select>
-          </div>
-        </div>
-        <div class="hint" style="margin-bottom:16px">Catatan: API upload file otomatis belum tersedia di dokumentasi yang dikirim, jadi sementara gunakan URL publik untuk gambar dan video.</div>
-      </div>
-
       <button class="go" id="go" type="submit">Generate</button>
     </form>
 
@@ -305,18 +276,16 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   // ---------- Form ----------
   function refreshWorkflow() {
     var w = $("workflow").value;
-    var kling = w === "kling", generate = w === "generate", extend = w === "extend";
-    $("sunoFields").hidden = kling; $("klingFields").hidden = !kling;
+    var generate = w === "generate", extend = w === "extend";
+    $("sunoFields").hidden = false;
     $("sourceAudioField").hidden = generate;
-    $("uploadUrl").required = !kling && !generate;
+    $("uploadUrl").required = !generate;
     $("continueAtField").hidden = !extend;
-    $("klingImageUrl").required = kling; $("klingVideoUrl").required = kling;
-    $("go").textContent = kling ? "Generate Motion Control" : generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
-    $("model").disabled = kling;
+    $("go").textContent = generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
+    $("model").disabled = false;
     $("durationField").hidden = extend;
   }
   $("workflow").addEventListener("change", refreshWorkflow);
-  $("klingPrompt").addEventListener("input", function () { $("klingPromptCount").textContent = $("klingPrompt").value.length; });
   refreshWorkflow();
   $("duration").addEventListener("input", function () {
     var n = Number($("duration").value), m = Math.floor(n / 60), r = n % 60;
@@ -402,24 +371,13 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       bar.appendChild(dl); bar.appendChild(l);
       d.appendChild(a); d.appendChild(bar); box.appendChild(d);
     });
-    var kling = $("workflow").value === "kling";
-    if (kling) {
-      box.innerHTML = "";
-      urls.forEach(function (u, i) {
-        var d = document.createElement("div"); d.className = "track";
-        var v = document.createElement("video"); v.controls = true; v.playsInline = true; v.preload = "metadata"; v.src = u; v.style.width = "100%"; v.style.maxHeight = "520px"; v.style.borderRadius = "8px";
-        var bar = document.createElement("div"); bar.className = "acts";
-        var dl = document.createElement("button"); dl.type = "button"; dl.textContent = "Unduh video"; dl.addEventListener("click", function () { download(u, "kling-motion-" + (i + 1) + ".mp4", dl); });
-        var a = document.createElement("a"); a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Buka video";
-        bar.appendChild(dl); bar.appendChild(a); d.appendChild(v); d.appendChild(bar); box.appendChild(d);
-      });
-    } else {
+    {
       var firstAudio = box.querySelector("audio");
       if (firstAudio) { var pr = firstAudio.play(); if (pr && pr.catch) pr.catch(function () {}); }
     }
     var sec = data.costTime ? " dalam " + Math.round(data.costTime / 1000) + " detik" : "";
     setState("ok", "Selesai",
-      urls.length ? (kling ? "Video Motion Control selesai" : "Cover selesai") + sec + ". " + keyNote + (data.creditsConsumed ? " Kredit terpakai: " + data.creditsConsumed + "." : "") + " Segera unduh hasilnya."
+      urls.length ? "Cover selesai" + sec + ". " + keyNote + (data.creditsConsumed ? " Kredit terpakai: " + data.creditsConsumed + "." : "") + " Segera unduh hasilnya."
                   : "Tugas selesai, tetapi tidak ada URL hasil yang dikenali. Lihat respons mentah di bawah.");
     $("raw").textContent = JSON.stringify(data, null, 2);
     $("rawBox").hidden = urls.length > 0;
@@ -451,33 +409,21 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     clearInterval(timer);
     $("tracks").innerHTML = ""; $("rawBox").hidden = true;
     var workflow = $("workflow").value;
-    var isKling = workflow === "kling";
-    if (isKling) {
-      var imageUrl = $("klingImageUrl").value.trim(), videoUrl = $("klingVideoUrl").value.trim();
-      if (!/^https?:\/\//i.test(imageUrl) || !/^https?:\/\//i.test(videoUrl)) return setState("err", "Gagal", "Masukkan URL publik gambar dan video yang valid.", true);
-      if (!$("klingPrompt").value.trim()) $("klingPrompt").value = "The character is dancing.";
-    }
-    var input = isKling ? {
-      workflow: "kling",
-      prompt: $("klingPrompt").value.trim() || "The character is dancing.",
-      input_urls: [$("klingImageUrl").value.trim()],
-      video_urls: [$("klingVideoUrl").value.trim()],
-      character_orientation: $("klingOrientation").value,
-      mode: $("klingMode").value
-    } : {
+    var input = {
       model: $("model").value,
       uploadUrl: $("uploadUrl").value.trim(),
       title: $("title").value.trim(),
       style: $("style").value.trim(),
-      prompt: $("style").value.trim(),
+      prompt: workflow === "generate" ? "" : $("style").value.trim(),
+      customMode: workflow === "generate",
       duration: Number($("duration").value),
       continueAt: Number($("continueAt").value),
       instrumental: $("instrumental").checked,
       negativeTags: $("negativeTags").value.trim(),
       styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: "normal"
-    };
-    if (!isKling && !input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
-    if (!isKling && workflow === "generate") delete input.uploadUrl;
+    }
+    if (!input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
+    if (workflow === "generate") delete input.uploadUrl;
     $("go").disabled = true;
     setState("wait", "Mengirim", "Membuat tugas…");
     try {
