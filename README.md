@@ -1,11 +1,11 @@
 # Studio Cover
 
-Web untuk membuat cover lagu lewat Emix API (model `suno/upload-and-cover-audio`).
+Web untuk membuat cover lagu lewat API musik (model `suno/upload-and-cover-audio`).
 Bisa dijalankan lokal atau di-deploy ke Vercel.
 
 ## API key sendiri
 
-Di halaman, tempel API key Emix sendiri (satu key per baris) atau upload file TXT berisi key. Jika key ditolak karena autentikasi (401) atau saldo habis (402), browser mencoba key berikutnya. Opsi "Ingat di browser ini" menyimpan daftar key di localStorage perangkat tersebut. Jangan aktifkan pada perangkat bersama.
+Di halaman, tempel API key sendiri (satu key per baris) atau upload file TXT berisi key. Jika key ditolak karena autentikasi (401) atau saldo habis (402), browser mencoba key berikutnya. Opsi "Ingat di browser ini" menyimpan daftar key di localStorage perangkat tersebut. Jangan aktifkan pada perangkat bersama.
 
 Aplikasi tidak menggunakan key default server. Key dikirim ke backend melalui header `x-api-key`, lalu backend meneruskannya ke Emix.
 
