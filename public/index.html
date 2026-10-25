@@ -155,33 +155,21 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   .eq span, html.busy .eq span, .state.wait .dot { animation: none; }
   button.go, button.go:hover:not(:disabled) { transition: none; transform: none; }
 }
-
-.login-wrap { width:min(440px, calc(100% - 28px)); margin:9vh auto 30px; }
-.login-panel { border:1px solid var(--line); border-radius:var(--radius); padding:clamp(22px,5vw,34px); background:var(--panel); box-shadow:0 20px 70px rgba(0,0,0,.28); backdrop-filter:var(--blur); }
-.login-panel h1 { font:700 clamp(24px,6vw,34px) var(--f-display); margin:0 0 8px; }
-.login-panel p { color:var(--muted); margin:0 0 22px; line-height:1.55; }
-.login-panel .field { margin:14px 0; }
-.login-panel input { width:100%; }
-.login-error { color:var(--rec); font-size:14px; min-height:20px; margin:10px 0; }
-.login-button { width:100%; border:0; border-radius:10px; padding:13px 16px; background:var(--accent); color:var(--accent-fg); font-weight:700; cursor:pointer; }
-.logout { border:1px solid var(--line); border-radius:999px; padding:8px 12px; color:var(--fg); background:var(--panel); cursor:pointer; }
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
+<div class="wrap">
   <header class="top">
     <div>
       <h1>Studio <span class="grad">Cover</span></h1>
       <p class="sub">Unggah lagu referensi lewat link, pilih gaya baru, lalu biarkan AI menyanyikannya ulang sebagai cover.</p>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
     <div class="themes" id="themes" role="group" aria-label="Tema tampilan">
       <button type="button" data-t="neon" style="--c1:#00e5ff;--c2:#ff3df0"><i></i>Neon</button>
       <button type="button" data-t="sunset" style="--c1:#ff8a4c;--c2:#ff3d77"><i></i>Sunset</button>
       <button type="button" data-t="terminal" style="--c1:#39ff6a;--c2:#1fd9a8"><i></i>Terminal</button>
       <button type="button" data-t="ocean" style="--c1:#3de0cb;--c2:#4d8bff"><i></i>Ocean</button>
       <button type="button" data-t="studio" style="--c1:#2b55f5;--c2:#8a3dff"><i></i>Studio</button>
-    </div>
     </div>
   </header>
   <div class="eq" id="eq" aria-hidden="true"></div>
@@ -190,12 +178,30 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     <form class="panel" id="form">
       <h2>Pengaturan lagu</h2>
 
-      <div class="field" style="margin-bottom:16px"><label for="apiKey">API key Emix</label><input id="apiKey" type="password" autocomplete="off" placeholder="Tempel API key Emix di sini" required><div class="hint">Key hanya dipakai untuk permintaan generate dan cek status pada sesi halaman ini. Jangan bagikan key ke orang lain.</div></div>
+      <div class="keybox">
+        <label for="keyMode">API key</label>
+        <select id="keyMode">
+          <option value="default">Default (dari server)</option>
+          <option value="own">Pakai API key sendiri</option>
+        </select>
+        <div class="hint" id="keyHint">Memeriksa key default…</div>
+
+        <div class="field" id="ownKeyField" hidden style="margin:14px 0 0">
+          <label for="ownKey">API key Emix kamu</label>
+          <input type="text" class="mask" id="ownKey" name="emix-token-field" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="Tempel API key di sini">
+          <label class="check"><input type="checkbox" id="remember"> Ingat di browser ini</label>
+        </div>
+
+        <div class="field" id="accessField" hidden style="margin:14px 0 0">
+          <label for="accessCode">Kode akses <span class="hint">(untuk memakai key default)</span></label>
+          <input type="text" class="mask" id="accessCode" name="emix-access-field" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+        </div>
+      </div>
 
       <div class="field">
         <label for="workflow">Studio</label>
-        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
-        <div class="hint">Pilih salah satu dari tiga fitur.</div>
+        <select id="workflow"><option value="kling">🎬 Kling Motion</option><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
+        <div class="hint">Pilih salah satu dari empat fitur.</div>
       </div>
 
       <div id="sunoFields">
@@ -208,6 +214,10 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <label for="uploadUrl">Link audio <span class="hint">(wajib untuk Cover Audio/Extend)</span></label>
         <input type="url" id="uploadUrl" placeholder="https://contoh.com/lagu.mp3" required>
         <div class="hint">URL publik berformat mp3, wav, aac, m4a, atau ogg. Maksimal 8 menit dan 50 MB.</div>
+        <label for="audioFile">Atau upload lagu dari perangkat</label>
+        <input type="file" id="audioFile" accept="audio/*">
+        <button type="button" class="uploadAsset" data-target="uploadUrl" data-kind="audio">Upload lagu ke Image2URL</button>
+        <div class="hint" id="audioUploadStatus"></div>
       </div>
 
       <div class="field">
@@ -250,6 +260,43 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
       </div><!-- /sunoFields -->
 
+      <div id="klingFields" hidden>
+        <div class="field">
+          <label for="klingImageUrl">URL gambar karakter</label>
+          <input type="url" id="klingImageUrl" placeholder="https://.../gambar.png">
+          <div class="hint">JPG/JPEG/PNG, maksimal 10 MB, dimensi lebih dari 300 px, rasio 2:5 sampai 5:2.</div>
+          <label for="klingImageFile">Atau pilih gambar dari perangkat</label>
+          <input type="file" id="klingImageFile" accept="image/jpeg,image/png,image/webp">
+          <button type="button" class="uploadAsset" data-target="klingImageUrl" data-kind="image">Upload gambar ke Image2URL</button>
+          <div class="hint" id="klingImageUploadStatus"></div>
+        </div>
+        <div class="field">
+          <label for="klingVideoUrl">URL video gerakan</label>
+          <input type="url" id="klingVideoUrl" placeholder="https://.../gerakan.mp4">
+          <div class="hint">MP4 atau MOV, maksimal 100 MB. File harus punya URL publik yang bisa diakses Emix.</div>
+          <label for="klingVideoFile">Atau pilih video dari perangkat</label>
+          <input type="file" id="klingVideoFile" accept="video/mp4,video/quicktime">
+          <button type="button" class="uploadAsset" data-target="klingVideoUrl" data-kind="video">Upload video ke Image2URL</button>
+          <div class="hint" id="klingVideoUploadStatus"></div>
+        </div>
+        <div class="field">
+          <label for="klingPrompt">Prompt (opsional)</label>
+          <textarea id="klingPrompt" maxlength="2500" placeholder="The character is dancing.">The character is dancing.</textarea>
+          <div class="count"><span id="klingPromptCount">26</span> / 2500</div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="klingOrientation">Orientasi karakter</label>
+            <select id="klingOrientation"><option value="video">Mengikuti video (maks. 30 detik)</option><option value="image">Mengikuti gambar (maks. 10 detik)</option></select>
+          </div>
+          <div class="field">
+            <label for="klingMode">Resolusi</label>
+            <select id="klingMode"><option value="720p">720p</option><option value="1080p">1080p</option></select>
+          </div>
+        </div>
+        <div class="hint" style="margin-bottom:16px">Catatan: API upload file otomatis belum tersedia di dokumentasi yang dikirim, jadi sementara gunakan URL publik untuk gambar dan video.</div>
+      </div>
+
       <button class="go" id="go" type="submit">Generate</button>
     </form>
 
@@ -267,25 +314,60 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var timer = null, startedAt = 0;
+  var info = { defaultKeys: 0, accessCodeRequired: false };
   var keyIndex = null, keyNote = "";
+
+  function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+
+  // ---------- API key ----------
+  function refreshKeyUI() {
+    var own = $("keyMode").value === "own";
+    $("ownKeyField").hidden = !own;
+    $("accessField").hidden = own || !info.accessCodeRequired;
+    if (own) $("keyHint").textContent = "Key kamu dikirim lewat server ini ke Emix dan tidak disimpan di server.";
+    else if (info.defaultKeys > 0) $("keyHint").textContent = info.defaultKeys + " key default tersedia. Otomatis pindah ke key berikutnya saat saldo habis.";
+    else $("keyHint").textContent = "Belum ada key default di server. Pilih API key sendiri.";
+  }
   function headers(json) {
-    var h = { "x-api-key": $("apiKey").value.trim() };
+    var h = {};
     if (json) h["Content-Type"] = "application/json";
+    if ($("keyMode").value === "own") h["x-api-key"] = $("ownKey").value.trim();
+    else if (info.accessCodeRequired) h["x-access-code"] = $("accessCode").value;
     return h;
   }
+
+  $("keyMode").addEventListener("change", function () { store("sc_mode", $("keyMode").value); refreshKeyUI(); });
+  $("remember").addEventListener("change", function () { if (!$("remember").checked) store("sc_key", null); });
+  $("ownKey").addEventListener("input", function () { if ($("remember").checked) store("sc_key", $("ownKey").value.trim()); });
+  $("accessCode").addEventListener("input", function () { store("sc_access", $("accessCode").value); });
+
+  fetch("/api/info").then(function (r) { return r.json(); }).then(function (j) {
+    info = j;
+  }).catch(function () {}).then(function () {
+    var savedKey = load("sc_key");
+    if (savedKey) { $("ownKey").value = savedKey; $("remember").checked = true; }
+    $("accessCode").value = load("sc_access");
+    var mode = load("sc_mode");
+    $("keyMode").value = (mode === "own" || (info.defaultKeys === 0)) ? "own" : "default";
+    refreshKeyUI();
+  });
+
   // ---------- Form ----------
   function refreshWorkflow() {
     var w = $("workflow").value;
-    var generate = w === "generate", extend = w === "extend";
-    $("sunoFields").hidden = false;
+    var kling = w === "kling", generate = w === "generate", extend = w === "extend";
+    $("sunoFields").hidden = kling; $("klingFields").hidden = !kling;
     $("sourceAudioField").hidden = generate;
-    $("uploadUrl").required = !generate;
+    $("uploadUrl").required = !kling && !generate;
     $("continueAtField").hidden = !extend;
-    $("go").textContent = generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
-    $("model").disabled = false;
+    $("klingImageUrl").required = kling; $("klingVideoUrl").required = kling;
+    $("go").textContent = kling ? "Generate Motion Control" : generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
+    $("model").disabled = kling;
     $("durationField").hidden = extend;
   }
   $("workflow").addEventListener("change", refreshWorkflow);
+  $("klingPrompt").addEventListener("input", function () { $("klingPromptCount").textContent = $("klingPrompt").value.length; });
   refreshWorkflow();
   $("duration").addEventListener("input", function () {
     var n = Number($("duration").value), m = Math.floor(n / 60), r = n % 60;
@@ -307,7 +389,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
   var ERR = {
     400: "Parameter tidak valid. Periksa isian form.",
-    401: "API key ditolak atau belum diisi. Periksa API key Emix lo.",
+    401: "Autentikasi ditolak. Jika memakai API key sendiri, periksa key di dashboard Emix. Jika memakai key default, periksa kode akses.",
     402: "Saldo API key tidak cukup.",
     404: "Sumber tidak ditemukan.",
     422: "Validasi gagal. Periksa link audio dan isian lainnya.",
@@ -371,13 +453,24 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       bar.appendChild(dl); bar.appendChild(l);
       d.appendChild(a); d.appendChild(bar); box.appendChild(d);
     });
-    {
+    var kling = $("workflow").value === "kling";
+    if (kling) {
+      box.innerHTML = "";
+      urls.forEach(function (u, i) {
+        var d = document.createElement("div"); d.className = "track";
+        var v = document.createElement("video"); v.controls = true; v.playsInline = true; v.preload = "metadata"; v.src = u; v.style.width = "100%"; v.style.maxHeight = "520px"; v.style.borderRadius = "8px";
+        var bar = document.createElement("div"); bar.className = "acts";
+        var dl = document.createElement("button"); dl.type = "button"; dl.textContent = "Unduh video"; dl.addEventListener("click", function () { download(u, "kling-motion-" + (i + 1) + ".mp4", dl); });
+        var a = document.createElement("a"); a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Buka video";
+        bar.appendChild(dl); bar.appendChild(a); d.appendChild(v); d.appendChild(bar); box.appendChild(d);
+      });
+    } else {
       var firstAudio = box.querySelector("audio");
       if (firstAudio) { var pr = firstAudio.play(); if (pr && pr.catch) pr.catch(function () {}); }
     }
     var sec = data.costTime ? " dalam " + Math.round(data.costTime / 1000) + " detik" : "";
     setState("ok", "Selesai",
-      urls.length ? "Cover selesai" + sec + ". " + keyNote + (data.creditsConsumed ? " Kredit terpakai: " + data.creditsConsumed + "." : "") + " Segera unduh hasilnya."
+      urls.length ? (kling ? "Video Motion Control selesai" : "Cover selesai") + sec + ". " + keyNote + (data.creditsConsumed ? " Kredit terpakai: " + data.creditsConsumed + "." : "") + " Segera unduh hasilnya."
                   : "Tugas selesai, tetapi tidak ada URL hasil yang dikenali. Lihat respons mentah di bawah.");
     $("raw").textContent = JSON.stringify(data, null, 2);
     $("rawBox").hidden = urls.length > 0;
@@ -390,7 +483,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       if (busy) return; busy = true;
       var sec = Math.round((Date.now() - startedAt) / 1000);
       try {
-        var url = "/api/status?taskId=" + encodeURIComponent(taskId) + "&workflow=" + encodeURIComponent($("workflow").value);
+        var url = "/api/status?taskId=" + encodeURIComponent(taskId) + "&workflow=" + encodeURIComponent($("workflow").value) + (keyIndex !== null ? "&keyIndex=" + keyIndex : "");
         var r = await fetch(url, { headers: headers(false) });
         var j = await r.json();
         if (j.code !== 200) return fail(j.code, j.msg);
@@ -404,26 +497,97 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     }, 5000);
   }
 
+
+  // Upload media to Image2URL, then put the returned public URL into the matching field.
+  // The Image2URL API may reject cross-origin browser requests; in that case use a same-origin server proxy.
+  document.querySelectorAll(".uploadAsset").forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      var target = $(btn.dataset.target);
+      var kind = btn.dataset.kind;
+      var fileInput = kind === "audio" ? $("audioFile") :
+                      kind === "image" ? $("klingImageFile") : $("klingVideoFile");
+      var status = kind === "audio" ? $("audioUploadStatus") :
+                   kind === "image" ? $("klingImageUploadStatus") : $("klingVideoUploadStatus");
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        status.textContent = "Pilih file terlebih dahulu.";
+        return;
+      }
+      if (kind === "audio" && !file.type.startsWith("audio/")) {
+        status.textContent = "Pilih file audio yang valid."; return;
+      }
+      if (kind === "image" && !file.type.startsWith("image/")) {
+        status.textContent = "Pilih file gambar yang valid."; return;
+      }
+      if (kind === "video" && !file.type.startsWith("video/")) {
+        status.textContent = "Pilih file video yang valid."; return;
+      }
+
+      var oldText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Mengunggah…";
+      status.textContent = "Mengirim file ke Image2URL…";
+      try {
+        var form = new FormData();
+        form.append("file", file, file.name);
+        var response = await fetch("https://www.image2url.com/api/upload-file", {
+          method: "POST",
+          body: form
+        });
+        var data = await response.json();
+        if (!response.ok || !data || data.success !== true || !data.url) {
+          throw new Error((data && (data.message || data.error)) || ("Upload gagal (HTTP " + response.status + ")"));
+        }
+        target.value = data.url;
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+        target.dispatchEvent(new Event("change", { bubbles: true }));
+        status.textContent = "Berhasil! URL sudah dimasukkan: " + data.url;
+      } catch (err) {
+        status.textContent = "Upload gagal: " + (err.message || String(err)) +
+          ". Jika muncul CORS, perlu endpoint proxy di server.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    });
+  });
+
   $("form").addEventListener("submit", async function (ev) {
     ev.preventDefault();
     clearInterval(timer);
     $("tracks").innerHTML = ""; $("rawBox").hidden = true;
+    if ($("keyMode").value === "own" && !$("ownKey").value.trim()) {
+      return setState("err", "Gagal", "Isi API key kamu dulu, atau pilih key default.", true);
+    }
     var workflow = $("workflow").value;
-    var input = {
+    var isKling = workflow === "kling";
+    if (isKling) {
+      var imageUrl = $("klingImageUrl").value.trim(), videoUrl = $("klingVideoUrl").value.trim();
+      if (!/^https?:\/\//i.test(imageUrl) || !/^https?:\/\//i.test(videoUrl)) return setState("err", "Gagal", "Masukkan URL publik gambar dan video yang valid.", true);
+      if (!$("klingPrompt").value.trim()) $("klingPrompt").value = "The character is dancing.";
+    }
+    var input = isKling ? {
+      workflow: "kling",
+      prompt: $("klingPrompt").value.trim() || "The character is dancing.",
+      input_urls: [$("klingImageUrl").value.trim()],
+      video_urls: [$("klingVideoUrl").value.trim()],
+      character_orientation: $("klingOrientation").value,
+      mode: $("klingMode").value
+    } : {
       model: $("model").value,
+      customMode: workflow === "generate",
       uploadUrl: $("uploadUrl").value.trim(),
       title: $("title").value.trim(),
       style: $("style").value.trim(),
-      prompt: workflow === "generate" ? "" : $("style").value.trim(),
-      customMode: workflow === "generate",
+      prompt: $("style").value.trim(),
       duration: Number($("duration").value),
       continueAt: Number($("continueAt").value),
       instrumental: $("instrumental").checked,
       negativeTags: $("negativeTags").value.trim(),
-      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: "normal"
-    }
-    if (!input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
-    if (workflow === "generate") delete input.uploadUrl;
+      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: workflow === "generate" ? "2" : "normal"
+    };
+    if (!isKling && !input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
+    if (!isKling && workflow === "generate") delete input.uploadUrl;
     $("go").disabled = true;
     setState("wait", "Mengirim", "Membuat tugas…");
     try {
@@ -436,7 +600,10 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         }
         return fail(j.code, detail);
       }
-      keyIndex = Number.isInteger(j.userKeyIndex) ? j.userKeyIndex : 0; keyNote = "Memakai API key yang dimasukkan.";
+      if ($("keyMode").value === "default" && typeof j.keyIndex === "number") {
+        keyIndex = j.keyIndex;
+        keyNote = "Memakai key default " + (j.keyIndex + 1) + " dari " + j.keyCount + ".";
+      } else { keyIndex = null; keyNote = "Memakai key kamu."; }
       poll(j.data.taskId);
     } catch (e) { fail(0, e.message); }
   });
