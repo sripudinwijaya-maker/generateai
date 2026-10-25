@@ -212,20 +212,14 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       </div>
       <div class="field">
         <label for="workflow">Studio</label>
-        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option><option value="voiceStudio">🎙️ Voice Studio (baru)</option></select>
-        <div class="hint">Pilih Generate Music, Cover Audio, Cover Extend, atau Voice Studio.</div>
+        <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
+        <div class="hint">Pilih Generate Music, Cover Audio, atau Cover Extend.</div>
       </div>
 
       <div id="sunoFields">
       <div class="field">
         <label for="model">Model</label>
         <select id="model"><option>V6</option><option>V6_WILD</option><option>V6_MINI</option></select>
-      </div>
-
-      <div class="field" id="personaField" hidden>
-        <label for="personaId">Custom Voice ID <span class="hint">(persona_id / voiceId)</span></label>
-        <input type="text" id="personaId" maxlength="200" placeholder="Tempel ID custom voice yang sudah dibuat">
-        <div class="hint">Gunakan ID voice yang sudah berhasil dibuat dan tersedia. Voice ID tidak dibuat otomatis di menu ini.</div>
       </div>
 
       <div class="field" id="sourceAudioField">
@@ -274,29 +268,13 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
       </div><!-- /sunoFields -->
 
-      <div id="voiceStudioFields" hidden>
-        <h2>🎙️ Custom Voice Studio</h2>
-        <div class="field"><label for="vsVoiceUrl">URL rekaman suara asli</label><input type="url" id="vsVoiceUrl" placeholder="https://.../vokal.mp3"><div class="hint">Gunakan vokal bersih/acapella yang bisa diakses publik. Setelah kalimat muncul, rekam dengan suara bicara (jangan dinyanyikan) dan tempel URL. API menentukan bahasa kalimat verifikasi; baca persis seperti yang tampil.</div></div>
-        <div class="row"><div class="field"><label for="vsStart">Vokal mulai (detik)</label><input type="number" id="vsStart" min="0" step="0.1" value="0"></div><div class="field"><label for="vsEnd">Vokal selesai (detik)</label><input type="number" id="vsEnd" min="0.1" step="0.1" value="10"></div></div>
-        <button type="button" class="go" id="vsValidate">1. Buat kalimat verifikasi</button>
-        <input type="hidden" id="vsTask"><div class="hint">Task validasi dibuat dan dipantau otomatis.</div>
-        <div class="field"><label for="vsPhrase">Kalimat verifikasi</label><textarea id="vsPhrase" readonly placeholder="Kalimat akan muncul di sini setelah task selesai"></textarea></div>
-        <button type="button" class="go" id="vsRegen">↻ Buat ulang kalimat</button>
-        <div class="field" style="margin-top:16px"><label for="vsVerifyUrl">URL rekaman membaca kalimat verifikasi</label><input type="url" id="vsVerifyUrl" placeholder="https://.../verification.mp3"></div>
-        <div class="field"><label for="vsName">Nama Voice</label><input type="text" id="vsName" maxlength="100" placeholder="Voice saya"></div>
-        <div class="field"><label for="vsDescription">Deskripsi</label><input type="text" id="vsDescription" maxlength="500" placeholder="Dibuat dari rekaman vokal sendiri"></div>
-        <div class="field"><label for="vsStyle">Style</label><input type="text" id="vsStyle" maxlength="500" placeholder="Pop, female vocal"></div>
-        <div class="field"><label for="vsSkill">Skill penyanyi</label><select id="vsSkill"><option>beginner</option><option>intermediate</option><option>advanced</option><option>professional</option></select></div>
-        <button type="button" class="go" id="vsCreate">2. Buat Custom Voice (otomatis cek & simpan)</button>
-        <input type="hidden" id="vsVoiceTask"><input type="hidden" id="vsVoiceId"><div class="hint" id="vsSaved">Voice ID akan dicek dan disimpan otomatis setelah Create Voice.</div>
-      </div>
       <button class="go" id="go" type="submit">Generate</button>
     </form>
 
     <section class="panel" aria-live="polite">
       <h2>Hasil</h2>
       <div class="state idle" id="state"><span class="dot"></span><span id="stateText">Belum ada tugas</span></div>
-      <p class="msg" id="msg">Isi pengaturan lagu lalu tekan Generate. Proses biasanya butuh beberapa menit.</p>
+      <p class="msg" id="msg">Isi form lalu tekan Buat cover. Proses biasanya butuh beberapa menit.</p>
       <div id="tracks"></div>
       <details id="rawBox" hidden><summary>Respons mentah</summary><pre id="raw"></pre></details>
     </section>
@@ -342,12 +320,8 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   // ---------- Form ----------
   function refreshWorkflow() {
     var w = $("workflow").value;
-    var generate = w === "generate", extend = w === "extend", voiceStudio = w === "voiceStudio";
-    $("sourceAudioField").hidden = generate || voiceStudio;
-    $("sunoFields").hidden = voiceStudio;
-    $("voiceStudioFields").hidden = !voiceStudio;
-    $("go").hidden = voiceStudio;
-    $("personaField").hidden = true;
+    var generate = w === "generate", extend = w === "extend";
+    $("sourceAudioField").hidden = generate;
     $("uploadUrl").required = !generate;
     $("continueAtField").hidden = !extend;
     $("go").textContent = generate ? "Generate Music" : extend ? "Upload Cover Extend" : "Upload Cover Audio";
@@ -487,37 +461,6 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   }
 
 
-  // ---------- Voice Studio: task, polling, cek, dan simpan otomatis ----------
-  function voiceInput(action) {
-    var input = {};
-    if (action === "validate") input = {voiceUrl:$("vsVoiceUrl").value.trim(), vocalStartS:Number($("vsStart").value), vocalEndS:Number($("vsEnd").value), language:"en"};
-    if (action === "regenerate") input = {taskId:$("vsTask").value.trim()};
-    if (action === "create") input = {taskId:$("vsTask").value.trim(), verifyUrl:$("vsVerifyUrl").value.trim(), voiceName:$("vsName").value.trim(), description:$ ("vsDescription").value.trim(), style:$ ("vsStyle").value.trim(), singerSkillLevel:$ ("vsSkill").value};
-    if (action === "check") input = {taskId:$ ("vsVoiceTask").value.trim()};
-    return input;
-  }
-  async function voiceRequest(action) {
-    var keys=parseKeys($("ownKey").value); if(!keys.length) return setState("err","Gagal","Masukkan API key sendiri.",true);
-    var btn={validate:"vsValidate",regenerate:"vsRegen",create:"vsCreate",check:"vsCheck"}[action]; $(btn).disabled=true;
-    setState("wait","Voice Studio","Mengirim " + action + "…");
-    try {
-      var j=null; for(var i=0;i<keys.length;i++){activeOwnKey=keys[i];var r=await fetch("/api/voice",{method:"POST",headers:headers(true),body:JSON.stringify({action:action,input:voiceInput(action)})});j=await r.json();if(j.code===200)break;if(j.code!==401&&j.code!==402)break;}
-      if(!j||j.code!==200) { var detail=j&&((j.msg||j.message||j.failMsg||"")+(j.upstreamStatus?" · HTTP upstream "+j.upstreamStatus:"")); if(j&&j.data) detail += "\n"+JSON.stringify(j.data); return fail(j?j.code:500,detail||"Request Voice Studio gagal. Periksa respons mentah."); }
-      var directVoice=j.data&&(j.data.voiceId||j.data.voice_id);if(action==="create"&&directVoice&&String(j.data.status||"").toLowerCase()==="success"){ $("vsVoiceTask").value=j.data.taskId||"";$("vsVoiceId").value=directVoice;await voiceRequest("check");return;}var task=j.data&&j.data.taskId;if(!task) { $("raw").textContent=JSON.stringify(j,null,2);$("rawBox").hidden=false;return setState("ok","Dikirim","Respons tidak berisi taskId; lihat respons mentah."); }
-      if(action==="validate"||action==="regenerate") { $("vsTask").value=task; await voicePoll(task,action); }
-      else if(action==="create") { $("vsVoiceTask").value=task; await voicePoll(task,"create"); }
-      else { var d=j.data.result||j.data||{}; var available=d.is_available===true||d.isAvailable===true; if(available){var id=$("vsVoiceId").value.trim();if(id){var arr=[];try{arr=JSON.parse(load("sc_voice_ids")||"[]")}catch(e){};if(!arr.some(function(x){return x.id===id}))arr.push({id:id,name:$ ("vsName").value.trim()||id});store("sc_voice_ids",JSON.stringify(arr));$("personaId").value=id;$("vsSaved").textContent="Voice ID tersimpan otomatis dan terpasang untuk Generate Music.";$ ("workflow").value="generate";refreshWorkflow();setState("ok","Voice siap!","Voice ID tersimpan. Lu sekarang bisa langsung Generate Music.");}else setState("ok","Voice tersedia","Emix menyatakan voice tersedia, tetapi Voice ID belum ditemukan.");}else setState("wait","Voice belum tersedia",JSON.stringify(d)); }
-    } catch(e){fail(0,e.message);} finally{$(btn).disabled=false;}
-  }
-  async function voicePoll(task,action) {
-    for(var n=0;n<150;n++){await new Promise(function(r){setTimeout(r,3000)});var r=await fetch("/api/status?taskId="+encodeURIComponent(task),{headers:headers(false)});var j=await r.json();if(j.code!==200)throw Error(j.msg||"Gagal cek task");var d=j.data||{};if(d.state==="fail")throw Error(d.failMsg||d.failCode||"Task gagal");if(d.state==="success") {var result={};try{result=JSON.parse(d.resultJson||"{}")}catch(e){};var phrase=result.verify_phrase_text||result.validateInfo||"";if(phrase){$("vsPhrase").value=typeof phrase==="string"?phrase:JSON.stringify(phrase);setState("ok","Kalimat verifikasi siap","Baca kalimat di atas, rekam, lalu tempel URL rekaman verifikasi.");return;}var persona=result.persona_id||result.voiceId||result.voice_id||d.voiceId||(d.data&&d.data.voiceId);if(persona){$("vsVoiceId").value=persona;if(action==="create"){setState("ok","Custom Voice selesai","Voice ID: "+persona+". Cek ketersediaan voice.");await voiceRequest("check");}else setState("ok","Custom Voice selesai","Voice ID: "+persona);return;}if(action==="create"){setState("ok","Create Voice selesai","Task sukses. Response belum berisi voiceId; cek respons mentah.");}$("raw").textContent=JSON.stringify(d,null,2);$("rawBox").hidden=false;setState("ok","Task selesai","Lihat respons mentah untuk hasil task.");return;}setState("wait","Memproses Voice","Status: "+(d.state||"waiting")+" · cek otomatis");}
-    throw Error("Timeout menunggu task Voice");
-  }
-  $("vsValidate").addEventListener("click",function(){voiceRequest("validate").catch(function(e){fail(0,e.message)});});
-  $("vsRegen").addEventListener("click",function(){voiceRequest("regenerate").catch(function(e){fail(0,e.message)});});
-  $("vsCreate").addEventListener("click",function(){voiceRequest("create").catch(function(e){fail(0,e.message)});});
-  (function(){try{var arr=JSON.parse(load("sc_voice_ids")||"[]");$("vsSaved").textContent=arr.length?arr.length+" Voice ID tersimpan di browser.":"Belum ada Voice ID tersimpan.";}catch(e){}})();
-
   $("form").addEventListener("submit", async function (ev) {
     ev.preventDefault();
     clearInterval(timer);
@@ -525,8 +468,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     ownKeyList = parseKeys($("ownKey").value);
     if (!ownKeyList.length) return setState("err", "Gagal", "Masukkan API key sendiri atau upload file TXT.", true);
     var workflow = $("workflow").value;
-    if (workflow === "voiceStudio") return;
-    if (["generate"].includes(workflow) && !/^https?:\/\//i.test($("uploadUrl").value.trim())) return setState("err", "Gagal", "Masukkan URL audio publik yang valid.", true);
+    if (workflow !== "generate" && !/^https?:\/\//i.test($("uploadUrl").value.trim())) return setState("err", "Gagal", "Masukkan URL audio publik yang valid.", true);
     var input = {
       model: $("model").value,
       uploadUrl: $("uploadUrl").value.trim(),
@@ -537,7 +479,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       negativeTags: $("negativeTags").value.trim(),
       styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65
     };
-    if (workflow === "generate") { input.duration = Number($("duration").value); var savedVoice = $("vsVoiceId").value.trim(); if (savedVoice) input.personaId = savedVoice; }
+    if (workflow === "generate") input.duration = Number($("duration").value);
     if (workflow === "extend") input.continueAt = Number($("continueAt").value);
     if (workflow !== "generate") input.model = "V6";
     if (!input.instrumental) { input.Lyrics = $("Lyrics").value.trim(); input.vocalGender = $("vocalGender").value; }
