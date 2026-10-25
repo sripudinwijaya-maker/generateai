@@ -279,7 +279,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <div class="field"><label for="vsVoiceUrl">URL rekaman suara asli</label><input type="url" id="vsVoiceUrl" placeholder="https://.../vokal.mp3"><div class="hint">Gunakan vokal bersih/acapella yang bisa diakses publik. Setelah kalimat muncul, rekam dengan suara bicara (jangan dinyanyikan) dan tempel URL. API menentukan bahasa kalimat verifikasi; baca persis seperti yang tampil.</div></div>
         <div class="row"><div class="field"><label for="vsStart">Vokal mulai (detik)</label><input type="number" id="vsStart" min="0" step="0.1" value="0"></div><div class="field"><label for="vsEnd">Vokal selesai (detik)</label><input type="number" id="vsEnd" min="0.1" step="0.1" value="10"></div></div>
         <button type="button" class="go" id="vsValidate">1. Buat kalimat verifikasi</button>
-        <div class="field" style="margin-top:16px"><label for="vsTask">Task ID validasi</label><input type="text" id="vsTask" placeholder="Task ID dari validasi"><div class="hint">Task ID diisi otomatis. Biasanya tidak perlu mengubahnya.</div></div>
+        <input type="hidden" id="vsTask"><div class="hint">Task validasi dibuat dan dipantau otomatis.</div>
         <div class="field"><label for="vsPhrase">Kalimat verifikasi</label><textarea id="vsPhrase" readonly placeholder="Kalimat akan muncul di sini setelah task selesai"></textarea></div>
         <button type="button" class="go" id="vsRegen">↻ Buat ulang kalimat</button>
         <div class="field" style="margin-top:16px"><label for="vsVerifyUrl">URL rekaman membaca kalimat verifikasi</label><input type="url" id="vsVerifyUrl" placeholder="https://.../verification.mp3"></div>
@@ -288,10 +288,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <div class="field"><label for="vsStyle">Style</label><input type="text" id="vsStyle" maxlength="500" placeholder="Pop, female vocal"></div>
         <div class="field"><label for="vsSkill">Skill penyanyi</label><select id="vsSkill"><option>beginner</option><option>intermediate</option><option>advanced</option><option>professional</option></select></div>
         <button type="button" class="go" id="vsCreate">2. Buat Custom Voice (otomatis cek & simpan)</button>
-        <div class="field" style="margin-top:16px"><label for="vsVoiceTask">Task ID Create Voice</label><input type="text" id="vsVoiceTask" placeholder="Task ID create voice"></div>
-        <button type="button" class="go" id="vsCheck">3. Cek Voice (otomatis)</button>
-        <div class="field" style="margin-top:16px"><label for="vsVoiceId">Voice ID / persona_id</label><input type="text" id="vsVoiceId" placeholder="Voice ID hasil create"></div>
-        <button type="button" class="go" id="vsSave">Simpan Voice ID (otomatis)</button><div class="hint" id="vsSaved"></div>
+        <input type="hidden" id="vsVoiceTask"><input type="hidden" id="vsVoiceId"><div class="hint" id="vsSaved">Voice ID akan dicek dan disimpan otomatis setelah Create Voice.</div>
       </div>
       <button class="go" id="go" type="submit">Generate</button>
     </form>
@@ -299,7 +296,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     <section class="panel" aria-live="polite">
       <h2>Hasil</h2>
       <div class="state idle" id="state"><span class="dot"></span><span id="stateText">Belum ada tugas</span></div>
-      <p class="msg" id="msg">Isi form lalu tekan Buat cover. Proses biasanya butuh beberapa menit.</p>
+      <p class="msg" id="msg">Isi pengaturan lagu lalu tekan Generate. Proses biasanya butuh beberapa menit.</p>
       <div id="tracks"></div>
       <details id="rawBox" hidden><summary>Respons mentah</summary><pre id="raw"></pre></details>
     </section>
@@ -490,7 +487,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   }
 
 
-  // ---------- Voice Studio tambahan; workflow lama tidak diubah ----------
+  // ---------- Voice Studio: task, polling, cek, dan simpan otomatis ----------
   function voiceInput(action) {
     var input = {};
     if (action === "validate") input = {voiceUrl:$("vsVoiceUrl").value.trim(), vocalStartS:Number($("vsStart").value), vocalEndS:Number($("vsEnd").value), language:"en"};
@@ -519,8 +516,6 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
   $("vsValidate").addEventListener("click",function(){voiceRequest("validate").catch(function(e){fail(0,e.message)});});
   $("vsRegen").addEventListener("click",function(){voiceRequest("regenerate").catch(function(e){fail(0,e.message)});});
   $("vsCreate").addEventListener("click",function(){voiceRequest("create").catch(function(e){fail(0,e.message)});});
-  $("vsCheck").addEventListener("click",function(){voiceRequest("check").catch(function(e){fail(0,e.message)});});
-  $("vsSave").addEventListener("click",function(){var id=$("vsVoiceId").value.trim();if(!id)return setState("err","Gagal","Voice ID kosong.",true);var saved=load("sc_voice_ids");var arr=[];try{arr=JSON.parse(saved||"[]")}catch(e){};if(!arr.some(function(x){return x.id===id}))arr.push({id:id,name:$("vsName").value.trim()||id});store("sc_voice_ids",JSON.stringify(arr));$("personaId").value=id;$("vsSaved").textContent="Voice ID tersimpan di browser dan otomatis dipakai saat Generate Music.";setState("ok","Voice ID disimpan","ID tersimpan lokal di browser.");});
   (function(){try{var arr=JSON.parse(load("sc_voice_ids")||"[]");$("vsSaved").textContent=arr.length?arr.length+" Voice ID tersimpan di browser.":"Belum ada Voice ID tersimpan.";}catch(e){}})();
 
   $("form").addEventListener("submit", async function (ev) {
