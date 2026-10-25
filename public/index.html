@@ -197,10 +197,10 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       <h2>Pengaturan lagu</h2>
 
       <div class="keybox">
-        <label for="ownKey">API key Emix sendiri</label>
+        <label for="ownKey">API key sendiri</label>
         <div class="hint" id="keyHint">Tempel API key sendiri atau upload file TXT. Key tidak disimpan di server.</div>
         <div class="field" id="ownKeyField" style="margin:14px 0 0">
-          <textarea id="ownKey" name="emix-token-field" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="Tempel API key di sini, satu key per baris" style="min-height:92px"></textarea>
+          <textarea id="ownKey" name="api-token-field" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="Tempel API key di sini, satu key per baris" style="min-height:92px"></textarea>
           <label for="keyFile" style="margin-top:10px">Atau upload TXT berisi API key</label>
           <input type="file" id="keyFile" accept=".txt,text/plain">
           <label class="check"><input type="checkbox" id="remember"> Ingat di browser ini</label>
@@ -345,12 +345,12 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
 
   var ERR = {
     400: "Parameter tidak valid. Periksa isian form.",
-    401: "Autentikasi ditolak. Jika memakai API key sendiri, periksa key di dashboard Emix. Jika memakai key default, periksa kode akses.",
+    401: "Autentikasi ditolak. Jika memakai API key sendiri, periksa API key kamu. Jika memakai key default, periksa kode akses.",
     402: "Saldo API key tidak cukup.",
     404: "Sumber tidak ditemukan.",
     422: "Validasi gagal. Periksa link audio dan isian lainnya.",
     429: "Terlalu banyak request. Tunggu beberapa detik lalu coba lagi.",
-    408: "Layanan di belakang Emix sedang bermasalah dan tidak mengembalikan hasil lebih dari 10 menit.",
+    408: "Layanan sedang bermasalah dan tidak mengembalikan hasil lebih dari 10 menit.",
     455: "Layanan sedang dalam perawatan.",
     500: "Server bermasalah. Coba lagi nanti.",
     501: "Pembuatan lagu gagal.",
@@ -402,7 +402,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       if (covers[i]) { var im = document.createElement("img"); im.src = covers[i]; im.alt = ""; im.className = "cover"; d.appendChild(im); }
       var player = document.createElement("div"); player.className = "cassette-player";
       var cassette = document.createElement("div"); cassette.className = "cassette";
-      cassette.innerHTML = '<div class="cassette-label"><span>EMIX TAPE</span><span class="tape-side">SIDE A</span></div><div class="reels"><i class="reel"><b></b></i><i class="tape-window"></i><i class="reel"><b></b></i></div><div class="tape-bottom">HI-FI STEREO · 90 MIN</div>';
+      cassette.innerHTML = '<div class="cassette-label"><span>STUDIO TAPE</span><span class="tape-side">SIDE A</span></div><div class="reels"><i class="reel"><b></b></i><i class="tape-window"></i><i class="reel"><b></b></i></div><div class="tape-bottom">HI-FI STEREO · 90 MIN</div>';
       var a = document.createElement("audio"); a.preload = "metadata"; a.src = u;
       var controls = document.createElement("div"); controls.className = "tape-controls";
       var play = document.createElement("button"); play.type = "button"; play.className = "tape-play"; play.textContent = "▶"; play.setAttribute("aria-label", "Putar lagu");
@@ -473,7 +473,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       prompt: $("style").value.trim(),
       instrumental: $("instrumental").checked,
       negativeTags: $("negativeTags").value.trim(),
-      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65, variety: "2"
+      styleWeight: 0.65, weirdnessConstraint: 0.65, audioWeight: 0.65
     };
     if (workflow === "generate") input.duration = Number($("duration").value);
     if (workflow === "extend") input.continueAt = Number($("continueAt").value);
@@ -494,7 +494,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       }
       if (!j || j.code !== 200) {
         var detail = (lastError && lastError.msg) || "";
-        if (lastError && lastError.source === "emix" && lastError.upstreamStatus) detail += " [Respons Emix HTTP " + lastError.upstreamStatus + "].";
+        if (lastError && lastError.upstreamStatus) detail += " [Respons layanan HTTP " + lastError.upstreamStatus + "].";
         return fail(lastError ? lastError.code : 500, detail || "Semua API key gagal.");
       }
       keyIndex = null;
