@@ -1,7 +1,8 @@
 # Studio Cover
 
-Web untuk membuat cover lagu lewat API musik (model `suno/upload-and-cover-audio`).
-Bisa dijalankan lokal atau di-deploy ke Vercel.
+Web untuk membuat musik, cover audio, dan extend lewat API Emix. Bisa dijalankan lokal atau di-deploy ke Vercel.
+
+Hasil audio menyediakan pilihan unduh MP3 atau WAV. Konversi format dilakukan di browser; konversi MP3 memerlukan koneksi internet untuk memuat encoder. Jika penyedia audio membatasi akses lintas situs (CORS), pengunduhan langsung mungkin gagal.
 
 ## API key sendiri
 
