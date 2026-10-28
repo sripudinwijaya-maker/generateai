@@ -59,16 +59,16 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {
-  margin: 0; color: var(--fg); font: 16px/1.55 var(--f-body); padding: 24px 16px 56px;
+  margin: 0; color: var(--fg); font: 16px/1.55 var(--f-body); padding: 14px 12px 28px;
   background:
     radial-gradient(900px 520px at 8% -8%, var(--g1), transparent 62%),
     radial-gradient(800px 520px at 100% 0%, var(--g2), transparent 58%),
     var(--bg);
   background-attachment: fixed;
 }
-.wrap { max-width: 1040px; margin: 0 auto; }
+.wrap { max-width: 980px; margin: 0 auto; }
 
-.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 18px 24px; margin-bottom: 18px; }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px 18px; margin-bottom: 10px; }
 h1 { font: 700 clamp(1.8rem, 6vw, 3rem)/1.02 var(--f-display); letter-spacing: -0.03em; margin: 0 0 8px; text-wrap: balance; }
 .grad { color: var(--accent); background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent)); background-size: 200% 100%; animation: gold-sweep 5s ease-in-out infinite; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .sub { color: var(--muted); margin: 0; max-width: 56ch; }
@@ -83,7 +83,7 @@ h1 { font: 700 clamp(1.8rem, 6vw, 3rem)/1.02 var(--f-display); letter-spacing: -
 .themes button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 6px 22px -8px var(--glow); }
 .themes button:hover { border-color: var(--accent); }
 
-.eq { display: flex; align-items: flex-end; gap: 4px; height: 56px; margin-bottom: 22px; overflow: hidden; }
+.eq { display: flex; align-items: flex-end; gap: 4px; height: 24px; margin-bottom: 12px; overflow: hidden; }
 .eq span {
   flex: 1; min-width: 0; max-width: 18px; height: 100%; border-radius: 3px 3px 0 0; transform-origin: bottom;
   background: linear-gradient(to top, var(--accent), var(--accent2)); opacity: .5;
@@ -94,10 +94,10 @@ html.busy .eq span { opacity: 1; animation-duration: calc(var(--d, 1.6s) * .38);
 @keyframes eq { from { transform: scaleY(var(--lo, .3)); } to { transform: scaleY(var(--hi, .9)); } }
 @keyframes gold-sweep { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
-.grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; align-items: start; }
 .panel {
   position: relative; overflow: hidden;
-  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; min-width: 0;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0;
   -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
   box-shadow: 0 18px 50px -28px var(--glow); animation: panel-glow 7s ease-in-out infinite alternate;
 }
@@ -110,11 +110,11 @@ input[type=text], input[type=url], textarea, select {
   border-radius: calc(var(--radius) * .5); padding: 10px 12px;
 }
 select option { background: var(--bg); color: var(--fg); }
-textarea { min-height: 130px; resize: vertical; }
+textarea { min-height: 84px; resize: vertical; }
 input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 input[type=text]:focus, input[type=url]:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--g1); }
-.field { margin-bottom: 16px; }
-.keybox { border: 1px dashed var(--line); border-radius: calc(var(--radius) * .6); padding: 14px; margin-bottom: 20px; }
+.field { margin-bottom: 11px; }
+.keybox { border: 1px dashed var(--line); border-radius: calc(var(--radius) * .6); padding: 10px; margin-bottom: 12px; }
 .mask { -webkit-text-security: disc; text-security: disc; }
 .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .count { font: 12px var(--f-data); color: var(--muted); text-align: right; margin-top: 4px; }
@@ -145,6 +145,12 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .track { border: 1px solid var(--line); border-radius: calc(var(--radius) * .6); padding: 12px; margin-bottom: 12px; background: var(--input); }
 .track audio { width: 100%; display: block; margin-bottom: 8px; }
 .track a { font: 500 13px var(--f-data); color: var(--accent); }
+.advanced { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 4px 0 14px; }
+.advanced summary, .keybox summary { cursor: pointer; color: var(--accent); font-weight: 600; margin: 0; }
+.keybox[open] summary, .advanced[open] summary { margin-bottom: 12px; }
+.download-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.download-row select { width:auto; min-width:88px; padding:7px 9px; font-size:13px; }
+@media (max-width:780px) { body { padding:12px 10px 24px; } .top { gap:10px; } .panel { padding:13px; } .themes { gap:5px; } .themes button { padding:5px 8px; font-size:12px; } }
 
 .cassette-player { border:1px solid var(--line); border-radius:14px; padding:12px; margin:8px 0 12px; background:linear-gradient(145deg,var(--g1),var(--input)); }
 .cassette { max-width:280px; margin:0 auto 12px; padding:12px 14px 9px; border:2px solid var(--line); border-radius:12px; background:linear-gradient(145deg,#4a2b0e,#17100a 65%,#30200b); color:#fff1cc; box-shadow:inset 0 1px 0 #ffffff22,0 8px 20px #0005; }
@@ -200,7 +206,8 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     <form class="panel" id="form">
       <h2>Pengaturan lagu</h2>
 
-      <div class="keybox">
+      <details class="keybox" id="keySettings">
+        <summary>API key sendiri</summary>
         <label for="ownKey">API key sendiri</label>
         <div class="hint" id="keyHint">Tempel API key sendiri atau upload file TXT. Key tidak disimpan di server.</div>
         <div class="field" id="ownKeyField" style="margin:14px 0 0">
@@ -209,7 +216,7 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
           <input type="file" id="keyFile" accept=".txt,text/plain">
           <label class="check"><input type="checkbox" id="remember"> Ingat di browser ini</label>
         </div>
-      </div>
+      </details>
       <div class="field">
         <label for="workflow">Studio</label>
         <select id="workflow"><option value="generate">🎵 Generate Music</option><option value="cover">🎧 Upload Cover Audio</option><option value="extend">⏩ Upload Cover Extend</option></select>
@@ -256,15 +263,17 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
         <div class="count"><span id="lyricsCount">0</span> / 5000</div>
       </div>
 
-      <div class="field">
-        <label for="negativeTags">Gaya yang dihindari</label>
-        <input type="text" id="negativeTags" maxlength="1000" placeholder="Contoh: heavy metal, autotune">
-      </div>
-
-      <div class="field" id="vocalField">
-        <label for="vocalGender">Suara vokal</label>
-        <select id="vocalGender"><option value="f">Perempuan</option><option value="m">Laki-laki</option></select>
-      </div>
+      <details class="advanced">
+        <summary>Pengaturan lanjutan</summary>
+        <div class="field">
+          <label for="negativeTags">Gaya yang dihindari</label>
+          <input type="text" id="negativeTags" maxlength="1000" placeholder="Contoh: heavy metal, autotune">
+        </div>
+        <div class="field" id="vocalField">
+          <label for="vocalGender">Suara vokal</label>
+          <select id="vocalGender"><option value="f">Perempuan</option><option value="m">Laki-laki</option></select>
+        </div>
+      </details>
 
       </div><!-- /sunoFields -->
 
@@ -375,19 +384,59 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
     return out;
   }
 
-  // Unduh langsung ke perangkat. Kalau server file menolak (CORS), buka di tab baru sebagai cadangan.
-  async function download(u, name, btn) {
-    var old = btn.textContent; btn.disabled = true; btn.textContent = "Mengunduh…";
+  function audioBufferToWav(buffer) {
+    var channels=buffer.numberOfChannels, rate=buffer.sampleRate, frames=buffer.length, bytes=2;
+    var dataSize=frames*channels*bytes, out=new ArrayBuffer(44+dataSize), view=new DataView(out);
+    function str(o,s){for(var i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));}
+    str(0,"RIFF");view.setUint32(4,36+dataSize,true);str(8,"WAVE");str(12,"fmt ");
+    view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,channels,true);
+    view.setUint32(24,rate,true);view.setUint32(28,rate*channels*bytes,true);
+    view.setUint16(32,channels*bytes,true);view.setUint16(34,16,true);str(36,"data");view.setUint32(40,dataSize,true);
+    var chans=[];for(var c=0;c<channels;c++)chans.push(buffer.getChannelData(c));
+    var p=44;for(var i=0;i<frames;i++)for(var c=0;c<channels;c++){
+      var v=Math.max(-1,Math.min(1,chans[c][i]));view.setInt16(p,v<0?v*32768:v*32767,true);p+=2;
+    }
+    return new Blob([out],{type:"audio/wav"});
+  }
+  function loadLame() {
+    if(window.lamejs)return Promise.resolve(window.lamejs);
+    if(window._lameLoading)return window._lameLoading;
+    window._lameLoading=new Promise(function(resolve,reject){
+      var sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js";
+      sc.onload=function(){window.lamejs?resolve(window.lamejs):reject(new Error("Encoder MP3 tidak tersedia"));};
+      sc.onerror=function(){reject(new Error("Gagal memuat encoder MP3. Periksa koneksi internet."));};
+      document.head.appendChild(sc);
+    });return window._lameLoading;
+  }
+  async function convertToMp3(buffer) {
+    var lame=await loadLame(), channels=Math.min(2,buffer.numberOfChannels);
+    var enc=new lame.Mp3Encoder(channels,buffer.sampleRate,192), left=buffer.getChannelData(0);
+    var right=channels===2?buffer.getChannelData(1):left, chunks=[], block=1152;
+    for(var i=0;i<left.length;i+=block){
+      var n=Math.min(block,left.length-i), l=new Int16Array(n), r=new Int16Array(n);
+      for(var j=0;j<n;j++){l[j]=Math.max(-1,Math.min(1,left[i+j]))*32767;r[j]=Math.max(-1,Math.min(1,right[i+j]))*32767;}
+      var b=channels===2?enc.encodeBuffer(l,r):enc.encodeBuffer(l);if(b.length)chunks.push(new Int8Array(b));
+    }
+    var tail=enc.flush();if(tail.length)chunks.push(new Int8Array(tail));
+    return new Blob(chunks,{type:"audio/mpeg"});
+  }
+  async function download(u, base, format, btn) {
+    var old=btn.textContent;btn.disabled=true;btn.textContent="Menyiapkan…";
     try {
-      var r = await fetch(u);
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      var blob = await r.blob();
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = name;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
-    } catch (e) { window.open(u, "_blank", "noopener"); }
-    finally { btn.disabled = false; btn.textContent = old; }
+      var r=await fetch(u);if(!r.ok)throw new Error("HTTP "+r.status);
+      var src=await r.blob(), result=src;
+      var same=(format==="MP3"&&(src.type==="audio/mpeg"||/\.mp3(?:[?#]|$)/i.test(u)))||
+               (format==="WAV"&&(/^audio\/wav$|^audio\/x-wav$/i.test(src.type)||/\.wav(?:[?#]|$)/i.test(u)));
+      if(!same){
+        var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error("Browser tidak mendukung konversi audio.");
+        btn.textContent="Mengonversi…";var ctx=new Ctx(), buf=await ctx.decodeAudioData((await src.arrayBuffer()).slice(0));
+        result=format==="WAV"?audioBufferToWav(buf):await convertToMp3(buf);if(ctx.close)await ctx.close();
+      }
+      var a=document.createElement("a"),obj=URL.createObjectURL(result);a.href=obj;a.download=base+"."+format.toLowerCase();
+      document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(obj);},15000);
+      btn.textContent="Selesai ✓";
+    }catch(e){alert("Unduhan gagal: "+(e.message||"File tidak dapat diambil. Server audio mungkin membatasi akses (CORS)."));}
+    finally{setTimeout(function(){btn.disabled=false;btn.textContent=old;},1200);}
   }
 
   function showResult(data) {
@@ -421,12 +470,13 @@ pre { overflow-x: auto; background: var(--input); border: 1px solid var(--line);
       a.addEventListener("timeupdate", function () { if (isFinite(a.duration) && a.duration > 0) seek.value = String(Math.round(a.currentTime/a.duration*1000)); time.textContent = fmt(a.currentTime) + " / " + fmt(a.duration); });
       seek.addEventListener("input", function () { if (isFinite(a.duration)) a.currentTime = Number(seek.value)/1000*a.duration; });
       controls.appendChild(play); controls.appendChild(seek); controls.appendChild(time); player.appendChild(cassette); player.appendChild(controls); player.appendChild(a);
-      var bar = document.createElement("div"); bar.className = "acts";
+      var bar = document.createElement("div"); bar.className = "acts download-row";
+      var format = document.createElement("select"); format.setAttribute("aria-label", "Format unduhan");
+      ["MP3", "WAV"].forEach(function (f) { var o = document.createElement("option"); o.value = f; o.textContent = f; format.appendChild(o); });
       var dl = document.createElement("button"); dl.type = "button"; dl.textContent = "Unduh";
-      var ext = (u.match(/\.(mp3|wav|m4a|aac|ogg)(\?|$)/i) || [0, "mp3"])[1].toLowerCase();
-      dl.addEventListener("click", function () { download(u, base + (urls.length > 1 ? "-" + (i + 1) : "") + "." + ext, dl); });
-      var l = document.createElement("a"); l.href = u; l.target = "_blank"; l.rel = "noopener"; l.textContent = "Buka di tab baru";
-      bar.appendChild(dl); bar.appendChild(l);
+      var fileBase = base + (urls.length > 1 ? "-" + (i + 1) : "");
+      dl.addEventListener("click", function () { download(u, fileBase, format.value, dl); });
+      bar.appendChild(format); bar.appendChild(dl);
       d.appendChild(player); d.appendChild(bar); box.appendChild(d);
     });
     var firstAudio = box.querySelector("audio");
